@@ -43,6 +43,8 @@ public class Swerve extends SubsystemBase {
         };
 
     Timer.delay(1.0);
+    resetModulesToAbsolute();
+
     swerveOdometry = new SwerveDriveOdometry(Constants.Swerve.swerveKinematics, getRotation2d(), getModulePositions());
 
     field = new Field2d();
@@ -135,6 +137,13 @@ public Rotation2d getRotation2d() {
     }
     return positions;
 }
+
+  public void resetModulesToAbsolute() {
+      for(SwerveModule mod : mSwerveMods) {
+        mod.resetToAbsolute();
+        System.out.println("Modules Reset to Absolute");
+      }
+  }
 
   @Override
   public void periodic() {
