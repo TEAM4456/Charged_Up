@@ -5,10 +5,17 @@
 package frc.robot;
 
 
+import com.pathplanner.lib.PathConstraints;
+import com.pathplanner.lib.PathPlanner;
+import com.pathplanner.lib.PathPlannerTrajectory;
+import com.pathplanner.lib.commands.PPSwerveControllerCommand;
+
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Commands.TeleopSwerve;
 import frc.robot.Subsystems.Swerve;
@@ -69,6 +76,33 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An ExampleCommand will run in autonomous
-    return null;
+    //return null;
+      s_Swerve.zeroHeading();
+      s_Swerve.resetModulesToAbsolute();
+      PathPlannerTrajectory examplePath = PathPlanner.loadPath("New Path", new PathConstraints(3, 2));
+
+      // This will load the file "Example Path.path" and generate it with a max
+      // velocity of 3 m/s and a max acceleration of 2 m/s^2
+
+      //s_Swerve.field.getObject("traj").setTrajectory(examplePath);
+
+      return new SequentialCommandGroup(
+          new InstantCommand(() -> {
+              // Reset odometry for the first path you run during auto
+              s_Swerve.resetOdometry(examplePath.getInitialPose());
+
+          }, s_Swerve),
+          
+          new PPSwerveControllerCommand(
+            examplePath, 
+            s_Swerve::getPose, // Pose supplier
+            Constants.Swerve.swerveKinematics, // SwerveDriveKinematics
+            new PIDController(0, 0, 0), // X controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
+            new PIDController(0, 0, 0), // Y controller (usually the same values as X controller)
+            new PIDController(0, 0, 0), // Rotation controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
+            s_Swerve::setModuleStates, // Module states consumer
+            true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
+            s_Swerve // Requires this drive subsystem
+          ));
   }
 }
