@@ -5,19 +5,34 @@
 package frc.robot;
 
 
+import java.util.List;
+
 import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.trajectory.TrajectoryConfig;
+import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Commands.TeleopSwerve;
+import frc.robot.Commands.autoToPose;
+import frc.robot.Commands.limeLightSwerve;
+import frc.robot.Subsystems.LimeLightSubsystem;
 import frc.robot.Subsystems.Swerve;
 
 
@@ -45,6 +60,8 @@ public class RobotContainer {
   /* Subsystems */
   private final Swerve s_Swerve = new Swerve();
 
+
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     s_Swerve.setDefaultCommand(
@@ -67,6 +84,10 @@ public class RobotContainer {
   private void configureButtonBindings() {
     /* Driver Buttons */
     driver.x().onTrue(new InstantCommand(() -> s_Swerve.zeroHeading()));
+    driver.a().whileTrue(new limeLightSwerve(s_Swerve));
+  }
+  public Swerve getSwerve(){
+    return s_Swerve;
   }
 
   /**
@@ -75,34 +96,50 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
+     
     // An ExampleCommand will run in autonomous
     //return null;
       s_Swerve.zeroHeading();
       s_Swerve.resetModulesToAbsolute();
-      PathPlannerTrajectory examplePath = PathPlanner.loadPath("New Path", new PathConstraints(3, 2));
+        TrajectoryConfig config =
+            new TrajectoryConfig(
+                    Constants.AutoConstants.kMaxSpeedMetersPerSecond,
+                    Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared)
+                .setKinematics(Constants.Swerve.swerveKinematics);
 
+        // An example trajectory to follow.  All units in meters.
+        Trajectory exampleTrajectory =
+            TrajectoryGenerator.generateTrajectory(
+                // Start at the origin facing the +X direction
+                new Pose2d(0, 0, new Rotation2d(0)),
+                // Pass through these two interior waypoints, making an 's' curve path
+                List.of(new Translation2d(1, 1), new Translation2d(2, -1), new Translation2d(3,0)),
+                // End 3 meters straight ahead of where we started, facing forward
+                new Pose2d(0, 0, new Rotation2d(0)),
+                config);
+
+        var thetaController =
+            new ProfiledPIDController(
+                Constants.AutoConstants.kPThetaController, 0, 0, Constants.AutoConstants.kThetaControllerConstraints);
+                thetaController.enableContinuousInput(-Math.PI, Math.PI);
+
+        new InstantCommand(() -> s_Swerve.resetOdometry(exampleTrajectory.getInitialPose()));
+        return new SwerveControllerCommand(
+                exampleTrajectory,
+                s_Swerve::getPose,
+                Constants.Swerve.swerveKinematics,
+                new PIDController(Constants.AutoConstants.kPXController, 0, 0),
+                new PIDController(Constants.AutoConstants.kPYController, 0, 0),
+                thetaController,
+                s_Swerve::setModuleStates,
+                s_Swerve);
+    }
       // This will load the file "Example Path.path" and generate it with a max
       // velocity of 3 m/s and a max acceleration of 2 m/s^2
 
       //s_Swerve.field.getObject("traj").setTrajectory(examplePath);
 
-      return new SequentialCommandGroup(
-          new InstantCommand(() -> {
-              // Reset odometry for the first path you run during auto
-              s_Swerve.resetOdometry(examplePath.getInitialPose());
-
-          }, s_Swerve),
+         
           
-          new PPSwerveControllerCommand(
-            examplePath, 
-            s_Swerve::getPose, // Pose supplier
-            Constants.Swerve.swerveKinematics, // SwerveDriveKinematics
-            new PIDController(0, 0, 0), // X controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
-            new PIDController(0, 0, 0), // Y controller (usually the same values as X controller)
-            new PIDController(0, 0, 0), // Rotation controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
-            s_Swerve::setModuleStates, // Module states consumer
-            true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
-            s_Swerve // Requires this drive subsystem
-          ));
-  }
+  
 }
