@@ -13,9 +13,5 @@ public class rotateDown extends CommandBase{
     public void execute() {
         arm.armRotateDown();
     }
-    public void end(boolean interrupted) {
-        arm.armRotateStop();
-
-    }
 }
 
