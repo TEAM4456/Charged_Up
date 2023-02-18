@@ -35,6 +35,17 @@ import frc.robot.Commands.limeLightSwerve;
 import frc.robot.Subsystems.LimeLightSubsystem;
 import frc.robot.Subsystems.Swerve;
 
+import frc.robot.Commands.ClampInLeft;
+import frc.robot.Commands.ClampInRight;
+import frc.robot.Commands.ClampOutLeft;
+import frc.robot.Commands.ClampOutRight;
+import frc.robot.Commands.moveDownCommand;
+import frc.robot.Commands.moveUpCommand;
+import frc.robot.Commands.rotateDown;
+import frc.robot.Commands.rotateUp;
+import frc.robot.Commands.toggleSpeed;
+import frc.robot.Subsystems.Arm;
+
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -59,6 +70,7 @@ public class RobotContainer {
 
   /* Subsystems */
   private final Swerve s_Swerve = new Swerve();
+  private final Arm arm = new Arm();
 
 
 
@@ -83,8 +95,26 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     /* Driver Buttons */
-    driver.x().onTrue(new InstantCommand(() -> s_Swerve.zeroHeading()));
-    driver.a().whileTrue(new limeLightSwerve(s_Swerve));
+    //driver.x().onTrue(new InstantCommand(() -> s_Swerve.zeroHeading()));
+    driver.start().whileTrue(new limeLightSwerve(s_Swerve));
+    driver.a().whileTrue(new moveUpCommand(arm));
+    driver.y().whileTrue(new moveDownCommand(arm));
+
+    driver.leftBumper().whileTrue(new ClampOutLeft(arm));
+    driver.rightBumper().whileTrue(new ClampOutRight(arm));
+
+    driver.leftTrigger().whileTrue(new ClampInLeft(arm));
+    driver.rightTrigger().whileTrue(new ClampInRight(arm));
+    
+    driver.b().whileTrue(new rotateUp(arm));
+    driver.x().whileTrue(new rotateDown(arm));
+
+    driver.back().toggleOnTrue(
+      new toggleSpeed(
+        s_Swerve,
+        () -> -driver.getRawAxis(translationAxis),
+        () -> -driver.getRawAxis(strafeAxis),
+        () -> -driver.getRawAxis(rotationAxis)));
   }
   public Swerve getSwerve(){
     return s_Swerve;

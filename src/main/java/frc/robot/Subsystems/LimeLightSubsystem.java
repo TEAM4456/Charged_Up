@@ -28,17 +28,4 @@ public class LimeLightSubsystem extends SubsystemBase {
    *
    * @return value of some boolean subsystem state, such as a digital sensor.
    */
-
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
-   
-
-
-  }
-
-  @Override
-  public void simulationPeriodic() {
-    // This method will be called once per scheduler run during simulation
-  }
 }
