@@ -11,11 +11,6 @@ public class ClampInLeft extends CommandBase{
         this.arm = arm;
     }
     public void execute() {
-        
         arm.clampInLeft();
-    }
-    public void end(boolean interrupted) {
-        arm.clampStopLeft();
-
     }
 }

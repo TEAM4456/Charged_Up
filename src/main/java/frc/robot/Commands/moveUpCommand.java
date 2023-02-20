@@ -12,11 +12,6 @@ public class moveUpCommand extends CommandBase{
     }
     public void execute() {
         arm.armUp();
-        System.out.println("ran");
-    }
-    public void end(boolean interrupted) {
-        arm.armStop();
-
     }
 }
 

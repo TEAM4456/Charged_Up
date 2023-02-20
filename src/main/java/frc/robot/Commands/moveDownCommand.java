@@ -13,8 +13,4 @@ public class moveDownCommand extends CommandBase{
     public void execute() {
         arm.armDown();
     }
-    public void end(boolean interrupted) {
-        arm.armStop();
-
-    }
 }

@@ -14,8 +14,4 @@ public class ClampInRight extends CommandBase{
         
         arm.clampInRight();
     }
-    public void end(boolean interrupted) {
-        arm.clampStopRight();
-
-    }
 }

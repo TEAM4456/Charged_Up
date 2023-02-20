@@ -13,8 +13,4 @@ public class ClampOutLeft extends CommandBase{
     public void execute() {
         arm.clampOutLeft();
     }
-    public void end(boolean interrupted) {
-        arm.clampStopLeft();
-
-    }
 }
