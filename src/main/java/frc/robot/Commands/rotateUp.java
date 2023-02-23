@@ -1,3 +1,4 @@
+
 package frc.robot.Commands;
 
 
@@ -13,5 +14,7 @@ public class rotateUp extends CommandBase{
     public void execute() {
         arm.armRotateUp();
     }
-}
 
+  // Returns true when the command should end.
+
+}

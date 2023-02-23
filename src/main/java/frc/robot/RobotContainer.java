@@ -45,13 +45,22 @@ import frc.robot.Commands.rotateDown;
 import frc.robot.Commands.rotateUp;
 import frc.robot.Commands.toggleSpeed;
 import frc.robot.Subsystems.Arm;
+import frc.robot.Commands.ClampInRight;
+import frc.robot.Commands.ClampOutRight;
+import frc.robot.Commands.ClampPosition;
+import frc.robot.Commands.ElevatorIn;
+import frc.robot.Commands.ElevatorOut;
+import frc.robot.Commands.rotateDown;
+import frc.robot.Commands.rotateUp;
+import frc.robot.Subsystems.Arm;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
  * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
  * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
- * subsystems, commands, and button mappings) should be declared here.
+ * subsystems, Commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
   /* Controllers */
@@ -74,7 +83,7 @@ public class RobotContainer {
 
 
 
-  /** The container for the robot. Contains subsystems, OI devices, and commands. */
+  /** The container for the robot. Contains subsystems, OI devices, and Commands. */
   public RobotContainer() {
     s_Swerve.setDefaultCommand(
         new TeleopSwerve(
@@ -96,18 +105,19 @@ public class RobotContainer {
   private void configureButtonBindings() {
     /* Driver Buttons */
     //driver.x().onTrue(new InstantCommand(() -> s_Swerve.zeroHeading()));
-    driver.start().whileTrue(new limeLightSwerve(s_Swerve));
-    driver.a().whileTrue(new moveUpCommand(arm));
-    driver.y().whileTrue(new moveDownCommand(arm));
-
-    driver.leftBumper().whileTrue(new ClampOutLeft(arm));
+    //driver.start().whileTrue(new limeLightSwerve(s_Swerve));
+ //    driver.a().whileTrue(new moveUpCommand(arm));
+//    driver.y().whileTrue(new moveDownCommand(arm));
+//
+    driver.leftBumper().whileTrue(new ClampInRight(arm));
     driver.rightBumper().whileTrue(new ClampOutRight(arm));
+//
+    driver.back().whileTrue(new ElevatorOut(arm));
+    driver.start().whileTrue(new ElevatorIn(arm));
 
-    driver.leftTrigger().whileTrue(new ClampInLeft(arm));
-    driver.rightTrigger().whileTrue(new ClampInRight(arm));
-    
     driver.b().whileTrue(new rotateUp(arm));
     driver.x().whileTrue(new rotateDown(arm));
+    driver.a().toggleOnTrue(new ClampPosition(arm));
 
     driver.back().toggleOnTrue(
       new toggleSpeed(

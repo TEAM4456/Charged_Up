@@ -13,5 +13,4 @@ public class ClampOutRight extends CommandBase{
     public void execute() {
         arm.clampOutRight();
     }
-
 }

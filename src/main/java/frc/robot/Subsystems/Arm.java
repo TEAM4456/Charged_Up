@@ -5,12 +5,14 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import edu.wpi.first.wpilibj.PowerDistribution;
+import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Arm extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
-
+  public final PowerDistribution pdp = new PowerDistribution(0, ModuleType.kCTRE);
   //elevator
   public final CANSparkMax motor13;
   public final CANSparkMax motor14;
@@ -66,77 +68,115 @@ public class Arm extends SubsystemBase {
     rotateEncoder = motor17.getEncoder();
 
     elevatorRightPID = motor13.getPIDController();
-    elevatorRightPID.setP(0);
+    elevatorRightPID.setP(.5);
     elevatorRightPID.setI(0);
     elevatorRightPID.setD(0);
     elevatorRightPID.setFF(0);
 
     elevatorLeftPID = motor14.getPIDController();
-    elevatorLeftPID.setP(0);
+    elevatorLeftPID.setP(.5);
     elevatorLeftPID.setI(0);
     elevatorLeftPID.setD(0);
     elevatorLeftPID.setFF(0);
 
     clampRightPID = motor15.getPIDController();
-    clampRightPID.setP(0);
+    clampRightPID.setP(.1);
     clampRightPID.setI(0);
     clampRightPID.setD(0);
     clampRightPID.setFF(0);
 
     clampLeftPID = motor16.getPIDController();
-    clampLeftPID.setP(0);
+    clampLeftPID.setP(.1);
     clampLeftPID.setI(0);
     clampLeftPID.setD(0);
     clampLeftPID.setFF(0);
 
     rotationPID = motor17.getPIDController();
-    rotationPID.setP(0);
+    rotationPID.setP(.5);
     rotationPID.setI(0);
     rotationPID.setD(0);
     rotationPID.setFF(0);
   }
   public void armUp(){
-    elevatorEncoderRight.setPosition(elevatorEncoderRight.getPosition() + 1);
-    elevatorEncoderLeft.setPosition(elevatorEncoderLeft.getPosition() + 1);
+    elevatorRightPID.setReference(elevatorEncoderRight.getPosition() + 4,CANSparkMax.ControlType.kPosition); 
+    elevatorLeftPID.setReference(elevatorEncoderRight.getPosition() + 4,CANSparkMax.ControlType.kPosition); 
   }
 
   public void armDown(){
-    elevatorEncoderRight.setPosition(elevatorEncoderRight.getPosition() - 1);
-    elevatorEncoderLeft.setPosition(elevatorEncoderLeft.getPosition() - 1);
+    elevatorRightPID.setReference(elevatorEncoderRight.getPosition() - 2,CANSparkMax.ControlType.kPosition); 
+    elevatorLeftPID.setReference(elevatorEncoderRight.getPosition() - 2,CANSparkMax.ControlType.kPosition); 
+  }
+
+  public void clampInPosition(){
+    clampRightPID.setReference(-3.8,CANSparkMax.ControlType.kPosition); 
+    clampLeftPID.setReference(12,CANSparkMax.ControlType.kPosition);  
+  }
+  public void clampOutPosition(){
+    clampRightPID.setReference(-7,CANSparkMax.ControlType.kPosition);
+    clampLeftPID.setReference(9,CANSparkMax.ControlType.kPosition);  
   }
 
   public void clampInRight(){
-    clampEncoderRight.setPosition(clampEncoderRight.getPosition() - 1);
+    //double setpoint = (clampEncoderRight.getPosition() + 0.5);
+    clampRightPID.setReference(clampEncoderRight.getPosition() + 0.5,CANSparkMax.ControlType.kPosition); 
   }
   public void clampOutRight(){
-    clampEncoderRight.setPosition(clampEncoderRight.getPosition() + 1);
+    double setpoint = (clampEncoderRight.getPosition() - 0.5);
+    clampRightPID.setReference(setpoint,CANSparkMax.ControlType.kPosition);
   }
-
+  /* 
+  public void clampOutVelocity(){
+    motor15.set(2);
+  }
+  public void clampInVelocity(){
+    motor15.set(-2);
+  }
+*/
   public void clampInLeft(){
-    clampEncoderLeft.setPosition(clampEncoderLeft.getPosition() - 1);
+    clampEncoderLeft.setPosition(clampEncoderLeft.getPosition() + .25);
   }
   public void clampOutLeft(){
-    clampEncoderLeft.setPosition(clampEncoderLeft.getPosition() + 1);
+    clampEncoderLeft.setPosition(clampEncoderLeft.getPosition() - .25);
+    motor13.setVoltage(0);
   }
 
   public void armRotateUp(){
-    rotateEncoder.setPosition(rotateEncoder.getPosition() + 1);
+    double rotateSetpoint = (rotateEncoder.getPosition() - 5);
+    rotationPID.setReference(rotateSetpoint,CANSparkMax.ControlType.kPosition);
   }
   public void armRotateDown(){
-    rotateEncoder.setPosition(rotateEncoder.getPosition() - 1);
+    double rotateSetpoint = (rotateEncoder.getPosition() + 5);
+    rotationPID.setReference(rotateSetpoint,CANSparkMax.ControlType.kPosition);
+  }
+  public void elevatorOut(){
+    double elevatorSetPoint = (elevatorEncoderRight.getPosition() - 2);
+    elevatorRightPID.setReference(elevatorSetPoint,CANSparkMax.ControlType.kPosition);
+    elevatorLeftPID.setReference(elevatorSetPoint,CANSparkMax.ControlType.kPosition);
+  }
+  public void elevatorIn(){
+    double elevatorSetPoint = (elevatorEncoderRight.getPosition() + 2);
+    elevatorRightPID.setReference(elevatorSetPoint,CANSparkMax.ControlType.kPosition);
+    elevatorLeftPID.setReference(elevatorSetPoint,CANSparkMax.ControlType.kPosition);
   }
 
+  
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    SmartDashboard.putNumber("Elevator Encoder Left",elevatorEncoderLeft.getPosition());
-    SmartDashboard.putNumber("Elevator Encoder Right",elevatorEncoderRight.getPosition());
+    SmartDashboard.putNumber("Elevator Left",elevatorEncoderLeft.getPosition());
+    SmartDashboard.putNumber("Elevator Right",elevatorEncoderRight.getPosition());
 
-    SmartDashboard.putNumber("Clamp Encoder Left",clampEncoderLeft.getPosition());
-    SmartDashboard.putNumber("Clamp Encoder Right",clampEncoderRight.getPosition());
+    SmartDashboard.putNumber("Clamp Left",clampEncoderLeft.getPosition());
+    SmartDashboard.putNumber("Clamp Right",clampEncoderRight.getPosition());
 
     SmartDashboard.putNumber("Rotation Encoder",rotateEncoder.getPosition());
 
+    SmartDashboard.putNumber("Rotation Motor Output",motor17.getAppliedOutput());
+    SmartDashboard.putNumber("clamp right motor output", motor15.getAppliedOutput());
+    SmartDashboard.putNumber("clamp left motor output", motor16.getAppliedOutput());
+
+    SmartDashboard.putNumber("PDP 8", pdp.getCurrent(8));
+    SmartDashboard.putNumber("PDP 9", pdp.getCurrent(9));
 
   }
 }
