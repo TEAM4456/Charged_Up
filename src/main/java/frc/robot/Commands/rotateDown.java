@@ -1,4 +1,3 @@
-
 package frc.robot.Commands;
 
 
@@ -14,6 +13,5 @@ public class rotateDown extends CommandBase{
     public void execute() {
         arm.armRotateDown();
     }
-
-
 }
+
