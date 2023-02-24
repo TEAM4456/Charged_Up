@@ -20,7 +20,9 @@ import frc.robot.Constants;
 import frc.robot.Subsystems.Swerve;
 
 /** Add your docs here. */
+
 public class autoToPose {
+/* 
     public autoToPose(Swerve s_Swerve){
         TrajectoryConfig config =
             new TrajectoryConfig(
@@ -56,4 +58,5 @@ public class autoToPose {
                 s_Swerve::setModuleStates,
                 s_Swerve);
     }
+    */
 }

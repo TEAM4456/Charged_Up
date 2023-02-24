@@ -58,6 +58,7 @@ public class Arm extends SubsystemBase {
 
     motor17 = new CANSparkMax(17, MotorType.kBrushless);
     motor17.setOpenLoopRampRate(.5);
+    motor17.setClosedLoopRampRate(.1);
 
     elevatorEncoderRight = motor13.getEncoder();
     elevatorEncoderLeft = motor14.getEncoder();
@@ -92,7 +93,7 @@ public class Arm extends SubsystemBase {
     clampLeftPID.setFF(0);
 
     rotationPID = motor17.getPIDController();
-    rotationPID.setP(.5);
+    rotationPID.setP(.04);
     rotationPID.setI(0);
     rotationPID.setD(0);
     rotationPID.setFF(0);
@@ -121,33 +122,30 @@ public class Arm extends SubsystemBase {
     clampRightPID.setReference(clampEncoderRight.getPosition() + 0.5,CANSparkMax.ControlType.kPosition); 
   }
   public void clampOutRight(){
-    double setpoint = (clampEncoderRight.getPosition() - 0.5);
-    clampRightPID.setReference(setpoint,CANSparkMax.ControlType.kPosition);
+    //double setpoint = (clampEncoderRight.getPosition() - 0.5);
+    clampRightPID.setReference(clampEncoderRight.getPosition() - 0.5,CANSparkMax.ControlType.kPosition);
   }
-  /* 
-  public void clampOutVelocity(){
-    motor15.set(2);
-  }
-  public void clampInVelocity(){
-    motor15.set(-2);
-  }
-*/
+
   public void clampInLeft(){
-    clampEncoderLeft.setPosition(clampEncoderLeft.getPosition() + .25);
+    clampLeftPID.setReference(clampEncoderRight.getPosition() + 0.5,CANSparkMax.ControlType.kPosition);
   }
+  
   public void clampOutLeft(){
-    clampEncoderLeft.setPosition(clampEncoderLeft.getPosition() - .25);
-    motor13.setVoltage(0);
+    clampLeftPID.setReference(clampEncoderRight.getPosition() - 0.5,CANSparkMax.ControlType.kPosition);
   }
 
   public void armRotateUp(){
-    double rotateSetpoint = (rotateEncoder.getPosition() - 5);
+    double rotateSetpoint = (rotateEncoder.getPosition() - 2);
     rotationPID.setReference(rotateSetpoint,CANSparkMax.ControlType.kPosition);
   }
   public void armRotateDown(){
-    double rotateSetpoint = (rotateEncoder.getPosition() + 5);
+    double rotateSetpoint = (rotateEncoder.getPosition() + 2);
     rotationPID.setReference(rotateSetpoint,CANSparkMax.ControlType.kPosition);
   }
+  public void armRotateHigh(){
+    rotationPID.setReference(-80,CANSparkMax.ControlType.kPosition);
+ }
+
   public void elevatorOut(){
     double elevatorSetPoint = (elevatorEncoderRight.getPosition() - 2);
     elevatorRightPID.setReference(elevatorSetPoint,CANSparkMax.ControlType.kPosition);
@@ -157,6 +155,22 @@ public class Arm extends SubsystemBase {
     double elevatorSetPoint = (elevatorEncoderRight.getPosition() + 2);
     elevatorRightPID.setReference(elevatorSetPoint,CANSparkMax.ControlType.kPosition);
     elevatorLeftPID.setReference(elevatorSetPoint,CANSparkMax.ControlType.kPosition);
+  }
+
+  public void rotateSpeedUp(){
+    motor17.set(1);
+  }
+
+  public void rotateSpeedDown(){
+    motor17.set(-1);
+  }
+
+  public void rotateSpeedHold(){
+    rotationPID.setReference(rotateEncoder.getPosition(), CANSparkMax.ControlType.kPosition);
+  }
+
+  public void rotateSpeedStop(){
+    motor17.set(0);
   }
 
   
@@ -177,6 +191,8 @@ public class Arm extends SubsystemBase {
 
     SmartDashboard.putNumber("PDP 8", pdp.getCurrent(8));
     SmartDashboard.putNumber("PDP 9", pdp.getCurrent(9));
+
+    SmartDashboard.putNumber("Rotate Status", motor17.getMotorTemperature());
 
   }
 }

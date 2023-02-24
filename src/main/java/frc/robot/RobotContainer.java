@@ -41,6 +41,8 @@ import frc.robot.Commands.ClampOutLeft;
 import frc.robot.Commands.ClampOutRight;
 import frc.robot.Commands.moveDownCommand;
 import frc.robot.Commands.moveUpCommand;
+import frc.robot.Commands.pivotDownSpeed;
+import frc.robot.Commands.pivotUpSpeed;
 import frc.robot.Commands.rotateDown;
 import frc.robot.Commands.rotateUp;
 import frc.robot.Commands.toggleSpeed;
@@ -50,6 +52,7 @@ import frc.robot.Commands.ClampOutRight;
 import frc.robot.Commands.ClampPosition;
 import frc.robot.Commands.ElevatorIn;
 import frc.robot.Commands.ElevatorOut;
+import frc.robot.Commands.RotateToPosition;
 import frc.robot.Commands.rotateDown;
 import frc.robot.Commands.rotateUp;
 import frc.robot.Subsystems.Arm;
@@ -112,12 +115,15 @@ public class RobotContainer {
     driver.leftBumper().whileTrue(new ClampInRight(arm));
     driver.rightBumper().whileTrue(new ClampOutRight(arm));
 //
-    driver.back().whileTrue(new ElevatorOut(arm));
-    driver.start().whileTrue(new ElevatorIn(arm));
+    driver.rightTrigger().whileTrue(new ElevatorOut(arm));
+    driver.leftTrigger().whileTrue(new ElevatorIn(arm));
 
-    driver.b().whileTrue(new rotateUp(arm));
-    driver.x().whileTrue(new rotateDown(arm));
+  //  driver.b().whileTrue(new rotateUp(arm));
+  //  driver.x().whileTrue(new rotateDown(arm));
+    driver.b().whileTrue(new pivotUpSpeed(arm));
+    driver.x().whileTrue(new pivotDownSpeed(arm));
     driver.a().toggleOnTrue(new ClampPosition(arm));
+    driver.start().toggleOnTrue(new RotateToPosition(arm));
 
     driver.back().toggleOnTrue(
       new toggleSpeed(
@@ -138,7 +144,8 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
      
     // An ExampleCommand will run in autonomous
-    //return null;
+    return null;
+/*    
       s_Swerve.zeroHeading();
       s_Swerve.resetModulesToAbsolute();
         TrajectoryConfig config =
@@ -173,6 +180,7 @@ public class RobotContainer {
                 thetaController,
                 s_Swerve::setModuleStates,
                 s_Swerve);
+*/
     }
       // This will load the file "Example Path.path" and generate it with a max
       // velocity of 3 m/s and a max acceleration of 2 m/s^2
