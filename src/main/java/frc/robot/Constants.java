@@ -25,8 +25,8 @@ public final class Constants {
     public static final boolean invertGyro = false; // Always ensure Gyro is CCW+ CW-
 
     /* Drivetrain Constants */
-    public static final double trackWidth = Units.inchesToMeters(21.73);
-    public static final double wheelBase = Units.inchesToMeters(21.73);
+    public static final double trackWidth = Units.inchesToMeters(20.75);
+    public static final double wheelBase = Units.inchesToMeters(27.5);
     public static final double wheelDiameter = Units.inchesToMeters(4.0);
     public static final double wheelCircumference = wheelDiameter * Math.PI;
 
@@ -44,11 +44,11 @@ public final class Constants {
             new Translation2d(wheelBase / 2.0, trackWidth / 2.0));
 
     /* Swerve Voltage Compensation */
-    public static final double voltageComp = 12.0;
+    public static final double voltageComp = 10.0;
 
     /* Swerve Current Limiting */
-    public static final int angleContinuousCurrentLimit = 20;
-    public static final int driveContinuousCurrentLimit = 40;
+    public static final int angleContinuousCurrentLimit = 15;
+    public static final int driveContinuousCurrentLimit = 30;
 
     /* Angle Motor PID Values */
     public static final double angleKP = 0.01;
@@ -57,14 +57,14 @@ public final class Constants {
     public static final double angleKFF = 0.0;
 
     /* Drive Motor PID Values */
-    public static final double driveKP = 0.1;
+    public static final double driveKP = 1.0;
     public static final double driveKI = 0.0;
     public static final double driveKD = 0.0;
     public static final double driveKFF = 0.0;
 
     /* Drive Motor Characterization Values */
-    public static final double driveKS = 0.667;
-    public static final double driveKV = 2.44;
+    public static final double driveKS = 0.467;
+    public static final double driveKV = 1.44;
     public static final double driveKA = 0.27;
 
     /* Drive Motor Conversion Factors */
@@ -74,8 +74,8 @@ public final class Constants {
     public static final double angleConversionFactor = 360.0 / angleGearRatio;
 
     /* Swerve Profiling Values */
-    public static final double maxSpeed = 4.5; // meters per second
-    public static final double maxAngularVelocity = 11.5;
+    public static final double maxSpeed = 3; // meters per second
+    public static final double maxAngularVelocity = 9.5;
 
     /* Neutral Modes */
     public static final IdleMode angleNeutralMode = IdleMode.kBrake;

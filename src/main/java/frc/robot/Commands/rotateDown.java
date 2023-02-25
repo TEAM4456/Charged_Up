@@ -12,7 +12,7 @@ public class rotateDown extends CommandBase{
         this.arm = arm;
     }
     public void execute() {
-        arm.armRotateDown();
+      //  arm.armRotateDown();
     }
 
 

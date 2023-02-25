@@ -11,7 +11,7 @@ public class RotateToPosition extends CommandBase{
         this.arm = arm;
     }
     public void execute() {
-        arm.armRotateHigh();
+        arm.rotatePosition(100);
     }
     //public void end(boolean interrupted){
     //    arm.clampOutPosition();

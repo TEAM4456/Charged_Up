@@ -11,7 +11,7 @@ public class moveUpCommand extends CommandBase{
         this.arm = arm;
     }
     public void execute() {
-        arm.armUp();
+     //   arm.armUp();
     }
 }
 

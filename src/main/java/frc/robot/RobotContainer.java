@@ -21,6 +21,7 @@ import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -68,6 +69,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 public class RobotContainer {
   /* Controllers */
   private final CommandXboxController driver = new CommandXboxController(0);
+  private final CommandXboxController second = new CommandXboxController(1);
 
   /* Drive Controls */
   private final int translationAxis = XboxController.Axis.kLeftY.value;
@@ -118,11 +120,11 @@ public class RobotContainer {
     driver.rightTrigger().whileTrue(new ElevatorOut(arm));
     driver.leftTrigger().whileTrue(new ElevatorIn(arm));
 
-  //  driver.b().whileTrue(new rotateUp(arm));
-  //  driver.x().whileTrue(new rotateDown(arm));
     driver.b().whileTrue(new pivotUpSpeed(arm));
     driver.x().whileTrue(new pivotDownSpeed(arm));
+   
     driver.a().toggleOnTrue(new ClampPosition(arm));
+   
     driver.start().toggleOnTrue(new RotateToPosition(arm));
 
     driver.back().toggleOnTrue(
@@ -131,6 +133,8 @@ public class RobotContainer {
         () -> -driver.getRawAxis(translationAxis),
         () -> -driver.getRawAxis(strafeAxis),
         () -> -driver.getRawAxis(rotationAxis)));
+
+  
   }
   public Swerve getSwerve(){
     return s_Swerve;
