@@ -1,19 +1,18 @@
 package frc.robot.Commands;
-
+import frc.robot.Constants;
 
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Subsystems.Arm;
 
-public class ClampPosition extends CommandBase{
+public class Hybrid extends CommandBase{
     public final Arm arm;
-    public ClampPosition(Arm arm){
+    public Hybrid(Arm arm) {
         this.arm = arm;
     }
     public void execute() {
-        arm.clampInPosition();
+        arm.rotatePosition(Constants.rotateHybrid);
+        arm.elevatorPosition(Constants.elevatorHybrid);
     }
-    public void end(boolean interrupted){
-        arm.clampOutPosition();
-    }
+
 }

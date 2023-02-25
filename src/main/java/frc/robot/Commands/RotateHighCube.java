@@ -1,5 +1,5 @@
 package frc.robot.Commands;
-
+import frc.robot.Constants;
 
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
@@ -11,7 +11,7 @@ public class RotateHighCube extends CommandBase{
         this.arm = arm;
     }
     public void execute() {
-        arm.rotatePosition(100);
+        arm.rotatePosition(Constants.rotateHighCube);
     }
 
 }

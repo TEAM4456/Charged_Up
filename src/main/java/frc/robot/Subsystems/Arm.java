@@ -10,6 +10,8 @@ import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+import frc.robot.Constants;
+
 public class Arm extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
   public final PowerDistribution pdp = new PowerDistribution(0, ModuleType.kCTRE);
@@ -18,28 +20,28 @@ public class Arm extends SubsystemBase {
   public final CANSparkMax motor13;
   public final CANSparkMax motor14;
 
-  private RelativeEncoder elevatorEncoderRight;
-  private RelativeEncoder elevatorEncoderLeft;
+  public RelativeEncoder elevatorEncoderRight;
+  public RelativeEncoder elevatorEncoderLeft;
 
-  private final SparkMaxPIDController elevatorRightPID;
-  private final SparkMaxPIDController elevatorLeftPID;
+  public final SparkMaxPIDController elevatorRightPID;
+  public final SparkMaxPIDController elevatorLeftPID;
 
 
   //clamps
   public final CANSparkMax motor15;
   public final CANSparkMax motor16;
 
-  private final SparkMaxPIDController clampRightPID;
-  private final SparkMaxPIDController clampLeftPID;
+  public final SparkMaxPIDController clampRightPID;
+  public final SparkMaxPIDController clampLeftPID;
 
-  private RelativeEncoder clampEncoderRight;
-  private RelativeEncoder clampEncoderLeft;
+  public RelativeEncoder clampEncoderRight;
+  public RelativeEncoder clampEncoderLeft;
   
 
   //rotate
   public final CANSparkMax motor17;
-  private RelativeEncoder rotateEncoder;
-  private final SparkMaxPIDController rotationPID;
+  public RelativeEncoder rotateEncoder;
+  public final SparkMaxPIDController rotationPID;
 
 
   public Arm() {
@@ -113,14 +115,18 @@ public class Arm extends SubsystemBase {
   */
 
 //CLAMP CONTROLS
-  public void clampInPosition(){
-    clampRightPID.setReference(-3.8,CANSparkMax.ControlType.kPosition); 
-    clampLeftPID.setReference(12,CANSparkMax.ControlType.kPosition);  
+  public void clampInPositionCone(){
+    clampRightPID.setReference(Constants.clampRightPickupCone,CANSparkMax.ControlType.kPosition); 
+    clampLeftPID.setReference(Constants.clampLeftPickupCone,CANSparkMax.ControlType.kPosition);  
+  }
+  public void clampInPositionCube(){
+    clampRightPID.setReference(Constants.clampRightPickupCube,CANSparkMax.ControlType.kPosition); 
+    clampLeftPID.setReference(Constants.clampLeftPickupCube,CANSparkMax.ControlType.kPosition);  
   }
   
   public void clampOutPosition(){
-    clampRightPID.setReference(-7,CANSparkMax.ControlType.kPosition);
-    clampLeftPID.setReference(9,CANSparkMax.ControlType.kPosition);  
+    clampRightPID.setReference(Constants.clampRightDrop,CANSparkMax.ControlType.kPosition);
+    clampLeftPID.setReference(Constants.clampLeftDrop,CANSparkMax.ControlType.kPosition);  
   }
 
   public void clampInRight(){
@@ -166,14 +172,15 @@ public class Arm extends SubsystemBase {
     motor17.set(-1);
   }
 
-  public void rotateSpeedHold(){
-    rotationPID.setReference(rotateEncoder.getPosition(), CANSparkMax.ControlType.kPosition);
-  }
-
   public void rotateSpeedStop(){
     motor17.set(0);
   }
 
+  public void rotateHold(){
+    rotationPID.setReference(rotateEncoder.getPosition(), CANSparkMax.ControlType.kPosition);
+  }
+
+  
   public void rotatePosition(double rotateSetpoint) {
     rotationPID.setReference(rotateSetpoint,CANSparkMax.ControlType.kPosition);
   }

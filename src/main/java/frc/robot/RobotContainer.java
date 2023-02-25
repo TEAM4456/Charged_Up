@@ -72,9 +72,9 @@ public class RobotContainer {
   private final CommandXboxController second = new CommandXboxController(1);
 
   /* Drive Controls */
-  private final int translationAxis = XboxController.Axis.kLeftY.value;
-  private final int strafeAxis = XboxController.Axis.kLeftX.value;
-  private final int rotationAxis = XboxController.Axis.kRightX.value;
+  private final int translationAxis = (XboxController.Axis.kLeftY.value * .8);
+  private final int strafeAxis = (XboxController.Axis.kLeftX.value * .8);
+  private final int rotationAxis = (XboxController.Axis.kRightX.value * .8);
 
   /* Driver Buttons */
  // private final JoystickButton zeroGyro =
@@ -114,6 +114,25 @@ public class RobotContainer {
  //    driver.a().whileTrue(new moveUpCommand(arm));
 //    driver.y().whileTrue(new moveDownCommand(arm));
 //
+    driver.leftTrigger().whileTrue(new ClampOutLeft(arm));
+    driver.leftBumper().whileTrue(new ClampInLeft(arm));
+
+    driver.rightTrigerr().whileTrue(new ClampOutRight(arm));
+    driver.rightBumpber().whileTrue(new clampInLeft(arm));
+
+    driver.back().toggleOnTrue(new toggleSpeed(s_Swerve));
+    driver.start().whileTrue(new limeLightSwerve(s_Swerve));
+
+    driver.y().whileTrue(new pivotUpSpeed(arm));
+    driver.a().whileTrue(new pivotDownSpeed(arm));
+
+    driver.x().whileTrue(new ElevatorIn(arm));
+    driver.b().whileTrue(new ElevatorIn(arm));
+
+    second.leftTrigger().whileTrue(new ClampPositionCone(arm));
+
+
+
     driver.leftBumper().whileTrue(new ClampInRight(arm));
     driver.rightBumper().whileTrue(new ClampOutRight(arm));
 //
@@ -145,11 +164,19 @@ public class RobotContainer {
    *
    * @return the command to run in autonomous
    */
-  public Command getAutonomousCommand() {
-     
+  public getAutonomousCommand() {
+    private static final String kDefaultAuto = "Default";
+    private Static final String kCustomAuto = "My Auto";
+    private String m_autoSelected;
+    private final SendableChooser<String> m_Chooser = new SendableChooser<>();
+
+    m_Chooser.setDefaultOption("Default Auto",kDefaultAuto);
+    m_Choooser.addOption("My Auto", kCustomAuto);
+    SmartDashboard.putDate("Auto Choiser", m_Chooser);
+     /* 
     // An ExampleCommand will run in autonomous
     return null;
-/*    
+ 
       s_Swerve.zeroHeading();
       s_Swerve.resetModulesToAbsolute();
         TrajectoryConfig config =
@@ -184,13 +211,13 @@ public class RobotContainer {
                 thetaController,
                 s_Swerve::setModuleStates,
                 s_Swerve);
-*/
+
     }
       // This will load the file "Example Path.path" and generate it with a max
       // velocity of 3 m/s and a max acceleration of 2 m/s^2
 
       //s_Swerve.field.getObject("traj").setTrajectory(examplePath);
-
+*/
          
           
   

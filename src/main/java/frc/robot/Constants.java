@@ -147,4 +147,31 @@ public final class Constants {
 
     public static final HashMap<String, Command> AUTO_EVENT_MAP = new HashMap<>();
   }
+  public static final class armConstants {
+    //Elevator Constants
+    
+    public static final double elevatorHighCone = 0;
+    public static final double elevatorHighCube = 0;
+    public static final double elevatorLowCone = 0;
+    public static final double elevatorLowCube = 0;
+    public static final double elevatorHybrid = 0;
+
+    //Rotate Constants
+    public static final double rotateHighCone = 0;
+    public static final double rotateHighCube = 0;
+    public static final double rotateLowCone = 0;
+    public static final double rotateLowCube = 0;
+    public static final double rotateHybrid = 0;
+
+    //Right Clamp Constants
+    public static final double clampRightPickupCone = 0;
+    public static final double clampRightPickupCube = 0;
+    public static final double clampRightDrop = 0;
+    
+    //Left Clamp Constants
+    public static final double clampLeftPickupCone = 0;
+    public static final double clampLeftPickupCube = 0;
+    public static final double clampLeftDrop = 0;
+
+  }
 }

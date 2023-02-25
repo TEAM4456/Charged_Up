@@ -1,17 +1,16 @@
 package frc.robot.Commands;
-import frc.robot.Constants;
+
 
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Subsystems.Arm;
 
-public class RotateHighCone extends CommandBase{
+public class ClampPositionCone extends CommandBase{
     public final Arm arm;
-    public RotateHighCone(Arm arm){
+    public ClampPositionCone(Arm arm){
         this.arm = arm;
     }
     public void execute() {
-        arm.rotatePosition(Constants.RotateHighCone);
+        arm.clampInPositionCone();
     }
-
 }
