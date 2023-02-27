@@ -1,7 +1,7 @@
-package frc.robot.Commands;
+package frc.robot.Autos;
 import frc.robot.Constants;
 
-
+/*
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Subsystems.Arm;
 
@@ -27,3 +27,4 @@ public class AutoDropLowCone extends CommandBase{
     }
 }
 
+*/

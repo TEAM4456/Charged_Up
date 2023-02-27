@@ -50,8 +50,8 @@ public class toggleSpeed extends CommandBase {
 
     /* Drive */
     s_Swerve.drive(
-        new Translation2d(translationVal/50, strafeVal/50).times(Constants.Swerve.maxSpeed),
-        (rotationVal/50) * Constants.Swerve.maxAngularVelocity,
+        new Translation2d(translationVal/10, strafeVal/10).times(Constants.Swerve.maxSpeed),
+        (rotationVal/10) * Constants.Swerve.maxAngularVelocity,
         //!robotCentricSup.getAsBoolean(),
         true);
   }

@@ -11,6 +11,8 @@ public class ClampPositionDrop extends CommandBase{
         this.arm = arm;
     }
     public void execute() {
-        arm.clampOutPositionCube();
+        arm.clampLeftPID.setP(.75);
+        arm.clampRightPID.setP(.75);
+        arm.clampOutPosition();
     }
 }

@@ -23,6 +23,7 @@ import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -40,8 +41,9 @@ import frc.robot.Commands.ClampInLeft;
 import frc.robot.Commands.ClampInRight;
 import frc.robot.Commands.ClampOutLeft;
 import frc.robot.Commands.ClampOutRight;
-import frc.robot.Commands.moveDownCommand;
-import frc.robot.Commands.moveUpCommand;
+import frc.robot.Commands.ClampPositionCone;
+import frc.robot.Commands.ClampPositionCube;
+import frc.robot.Commands.ClampPositionDrop;
 import frc.robot.Commands.pivotDownSpeed;
 import frc.robot.Commands.pivotUpSpeed;
 import frc.robot.Commands.rotateDown;
@@ -50,9 +52,14 @@ import frc.robot.Commands.toggleSpeed;
 import frc.robot.Subsystems.Arm;
 import frc.robot.Commands.ClampInRight;
 import frc.robot.Commands.ClampOutRight;
-import frc.robot.Commands.ClampPosition;
+
 import frc.robot.Commands.ElevatorIn;
 import frc.robot.Commands.ElevatorOut;
+import frc.robot.Commands.HighCone;
+import frc.robot.Commands.HighCube;
+import frc.robot.Commands.Hybrid;
+import frc.robot.Commands.LowCone;
+import frc.robot.Commands.LowCube;
 import frc.robot.Commands.RotateToPosition;
 import frc.robot.Commands.rotateDown;
 import frc.robot.Commands.rotateUp;
@@ -72,9 +79,9 @@ public class RobotContainer {
   private final CommandXboxController second = new CommandXboxController(1);
 
   /* Drive Controls */
-  private final int translationAxis = (XboxController.Axis.kLeftY.value * .8);
-  private final int strafeAxis = (XboxController.Axis.kLeftX.value * .8);
-  private final int rotationAxis = (XboxController.Axis.kRightX.value * .8);
+  private final int translationAxis = XboxController.Axis.kLeftY.value;
+  private final int strafeAxis = XboxController.Axis.kLeftX.value ;
+  private final int rotationAxis = XboxController.Axis.kRightX.value;
 
   /* Driver Buttons */
  // private final JoystickButton zeroGyro =
@@ -117,22 +124,35 @@ public class RobotContainer {
     driver.leftTrigger().whileTrue(new ClampOutLeft(arm));
     driver.leftBumper().whileTrue(new ClampInLeft(arm));
 
-    driver.rightTrigerr().whileTrue(new ClampOutRight(arm));
-    driver.rightBumpber().whileTrue(new clampInLeft(arm));
+    driver.rightTrigger().whileTrue(new ClampOutRight(arm));
+    driver.rightBumper().whileTrue(new ClampInRight(arm));
 
-    driver.back().toggleOnTrue(new toggleSpeed(s_Swerve));
     driver.start().whileTrue(new limeLightSwerve(s_Swerve));
+    driver.back().toggleOnTrue(
+      new toggleSpeed(
+        s_Swerve,
+        () -> -driver.getRawAxis(translationAxis),
+        () -> -driver.getRawAxis(strafeAxis),
+        () -> -driver.getRawAxis(rotationAxis)));
 
     driver.y().whileTrue(new pivotUpSpeed(arm));
     driver.a().whileTrue(new pivotDownSpeed(arm));
 
     driver.x().whileTrue(new ElevatorIn(arm));
-    driver.b().whileTrue(new ElevatorIn(arm));
+    driver.b().whileTrue(new ElevatorOut(arm));
 
     second.leftTrigger().whileTrue(new ClampPositionCone(arm));
+    second.rightBumper().whileTrue(new ClampPositionDrop(arm));
+    second.rightTrigger().whileTrue(new ClampPositionCube(arm));
+
+    second.leftBumper().whileTrue(new Hybrid(arm));
+    second.y().whileTrue(new HighCube(arm));
+    second.x().whileTrue(new LowCone(arm));
+    second.b().whileTrue(new HighCone(arm));
+    second.a().whileTrue(new LowCube(arm));
 
 
-
+/* 
     driver.leftBumper().whileTrue(new ClampInRight(arm));
     driver.rightBumper().whileTrue(new ClampOutRight(arm));
 //
@@ -142,16 +162,12 @@ public class RobotContainer {
     driver.b().whileTrue(new pivotUpSpeed(arm));
     driver.x().whileTrue(new pivotDownSpeed(arm));
    
-    driver.a().toggleOnTrue(new ClampPosition(arm));
+
    
     driver.start().toggleOnTrue(new RotateToPosition(arm));
+    */
 
-    driver.back().toggleOnTrue(
-      new toggleSpeed(
-        s_Swerve,
-        () -> -driver.getRawAxis(translationAxis),
-        () -> -driver.getRawAxis(strafeAxis),
-        () -> -driver.getRawAxis(rotationAxis)));
+    
 
   
   }
@@ -164,19 +180,13 @@ public class RobotContainer {
    *
    * @return the command to run in autonomous
    */
-  public getAutonomousCommand() {
-    private static final String kDefaultAuto = "Default";
-    private Static final String kCustomAuto = "My Auto";
-    private String m_autoSelected;
-    private final SendableChooser<String> m_Chooser = new SendableChooser<>();
+  private static final String kDefaultAuto = "Default";
+  private static final String kCustomAuto = "My Auto";
+  private String m_autoSelected;
+  private final SendableChooser<String> m_Chooser = new SendableChooser<>();
+  public Command getAutonomousCommand() {
 
-    m_Chooser.setDefaultOption("Default Auto",kDefaultAuto);
-    m_Choooser.addOption("My Auto", kCustomAuto);
-    SmartDashboard.putDate("Auto Choiser", m_Chooser);
-     /* 
     // An ExampleCommand will run in autonomous
-    return null;
- 
       s_Swerve.zeroHeading();
       s_Swerve.resetModulesToAbsolute();
         TrajectoryConfig config =
@@ -211,13 +221,14 @@ public class RobotContainer {
                 thetaController,
                 s_Swerve::setModuleStates,
                 s_Swerve);
+                
 
     }
       // This will load the file "Example Path.path" and generate it with a max
       // velocity of 3 m/s and a max acceleration of 2 m/s^2
 
       //s_Swerve.field.getObject("traj").setTrajectory(examplePath);
-*/
+
          
           
   

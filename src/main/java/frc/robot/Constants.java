@@ -38,10 +38,10 @@ public final class Constants {
 
     public static final SwerveDriveKinematics swerveKinematics =
         new SwerveDriveKinematics(
-            new Translation2d(-wheelBase / 2.0, -trackWidth / 2.0),
+            new Translation2d(wheelBase / 2.0, trackWidth / 2.0),
             new Translation2d(wheelBase / 2.0, -trackWidth / 2.0),
             new Translation2d(-wheelBase / 2.0, trackWidth / 2.0),
-            new Translation2d(wheelBase / 2.0, trackWidth / 2.0));
+            new Translation2d(-wheelBase / 2.0, -trackWidth / 2.0));
 
     /* Swerve Voltage Compensation */
     public static final double voltageComp = 10.0;
@@ -150,28 +150,28 @@ public final class Constants {
   public static final class armConstants {
     //Elevator Constants
     
-    public static final double elevatorHighCone = 0;
-    public static final double elevatorHighCube = 0;
+    public static final double elevatorHighCone = -75;
+    public static final double elevatorHighCube = -67;
     public static final double elevatorLowCone = 0;
     public static final double elevatorLowCube = 0;
-    public static final double elevatorHybrid = 0;
+    public static final double elevatorHybrid = -37.45;
 
     //Rotate Constants
-    public static final double rotateHighCone = 0;
-    public static final double rotateHighCube = 0;
-    public static final double rotateLowCone = 0;
-    public static final double rotateLowCube = 0;
-    public static final double rotateHybrid = 0;
+    public static final double rotateHighCone = 161.7;
+    public static final double rotateHighCube = 208.79;
+    public static final double rotateLowCone = 197.97;
+    public static final double rotateLowCube = 255;
+    public static final double rotateHybrid = 347;
 
     //Right Clamp Constants
-    public static final double clampRightPickupCone = 0;
-    public static final double clampRightPickupCube = 0;
-    public static final double clampRightDrop = 0;
+    public static final double clampRightPickupCone = -3;
+    public static final double clampRightPickupCube = -4.5;
+    public static final double clampRightDrop = -6.214;
     
     //Left Clamp Constants
-    public static final double clampLeftPickupCone = 0;
-    public static final double clampLeftPickupCube = 0;
-    public static final double clampLeftDrop = 0;
+    public static final double clampLeftPickupCone = 12.5;
+    public static final double clampLeftPickupCube =10.5 ;
+    public static final double clampLeftDrop = 9.5238;
 
   }
 }

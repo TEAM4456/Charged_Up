@@ -11,7 +11,7 @@ public class ElevatorHybrid extends CommandBase{
         this.arm = arm;
     }
     public void execute() {
-        arm.elevatorPosition(Constants.elevatorHybrid);
+        arm.elevatorPosition(Constants.armConstants.elevatorHybrid);
     }
 
 }

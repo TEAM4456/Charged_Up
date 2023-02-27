@@ -11,8 +11,8 @@ public class Hybrid extends CommandBase{
         this.arm = arm;
     }
     public void execute() {
-        arm.rotatePosition(Constants.rotateHybrid);
-        arm.elevatorPosition(Constants.elevatorHybrid);
+        arm.rotatePosition(Constants.armConstants.rotateHybrid);
+        arm.elevatorPosition(Constants.armConstants.elevatorHybrid);
     }
 
 }

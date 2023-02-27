@@ -11,8 +11,8 @@ public class LowCube extends CommandBase{
         this.arm = arm;
     }
     public void execute() {
-        arm.rotatePosition(Constants.rotateLowCube);
-        arm.elevatorPosition(Constants.elevatorLowCube);
+        arm.rotatePosition(Constants.armConstants.rotateLowCube);
+        arm.elevatorPosition(Constants.armConstants.elevatorLowCube);
     }
 
 }

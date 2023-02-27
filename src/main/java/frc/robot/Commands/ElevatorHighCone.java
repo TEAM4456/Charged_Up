@@ -11,7 +11,7 @@ public class ElevatorHighCone extends CommandBase{
         this.arm = arm;
     }
     public void execute() {
-        arm.elevatorPosition(Constants.elevatorHighCone);
+        arm.elevatorPosition(Constants.armConstants.elevatorHighCone);
     }
 
 }

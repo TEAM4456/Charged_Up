@@ -1,5 +1,6 @@
 package frc.robot.Commands;
 import frc.robot.Constants;
+import frc.robot.Subsystems.Arm;
 
 public class ElevatorLowCube {
     public final Arm arm;
@@ -7,6 +8,6 @@ public class ElevatorLowCube {
         this.arm = arm;
     }
     public void execute() {
-        arm.elevatorPosition(Constants.elevatorLowCube);
+        arm.elevatorPosition(Constants.armConstants.elevatorLowCube);
     }
 }

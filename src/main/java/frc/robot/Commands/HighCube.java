@@ -11,8 +11,8 @@ public class HighCube extends CommandBase{
         this.arm = arm;
     }
     public void execute() {
-        arm.rotatePosition(Constants.rotateHighCube);
-        arm.elevatorPosition(Constants.elevatorHighCube);
+        arm.rotatePosition(Constants.armConstants.rotateHighCube);
+        arm.elevatorPosition(Constants.armConstants.elevatorHighCube);
     }
 
 }

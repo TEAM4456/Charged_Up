@@ -11,6 +11,8 @@ public class ClampPositionCube extends CommandBase{
         this.arm = arm;
     }
     public void execute() {
+        arm.clampRightPID.setP(.5);
+        arm.clampLeftPID.setP(.5);
         arm.clampInPositionCube();
     }
 }

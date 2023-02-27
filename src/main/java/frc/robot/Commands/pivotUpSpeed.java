@@ -22,7 +22,12 @@ public class pivotUpSpeed extends CommandBase {
   
   @Override
   public void execute() {
+    if(arm.rotateEncoder.getPosition()<1){
+      arm.rotateSpeedHold();
+    }
+    else{
     arm.rotateSpeedUp();
+    }
   }
 
   // Called once the command ends or is interrupted.
