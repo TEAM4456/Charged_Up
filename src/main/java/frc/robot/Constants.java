@@ -155,6 +155,7 @@ public final class Constants {
     public static final double elevatorLowCone = 0;
     public static final double elevatorLowCube = 0;
     public static final double elevatorHybrid = -37.45;
+    public static final double elevatorDrive = 0;
 
     //Rotate Constants
     public static final double rotateHighCone = 161.7;
@@ -162,6 +163,7 @@ public final class Constants {
     public static final double rotateLowCone = 197.97;
     public static final double rotateLowCube = 255;
     public static final double rotateHybrid = 347;
+    public static final double rotateDrive = 0;
 
     //Right Clamp Constants
     public static final double clampRightPickupCone = -3;

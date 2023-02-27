@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -36,7 +37,9 @@ import frc.robot.Commands.autoToPose;
 import frc.robot.Commands.limeLightSwerve;
 import frc.robot.Subsystems.LimeLightSubsystem;
 import frc.robot.Subsystems.Swerve;
-
+import frc.robot.Autos.AutoDropLowCone;
+import frc.robot.Autos.AutoDropStart;
+import frc.robot.Autos.AutoPickUpCone;
 import frc.robot.Commands.ClampInLeft;
 import frc.robot.Commands.ClampInRight;
 import frc.robot.Commands.ClampOutLeft;
@@ -93,6 +96,7 @@ public class RobotContainer {
   private final Swerve s_Swerve = new Swerve();
   private final Arm arm = new Arm();
 
+  private final SendableChooser<Command> m_Chooser = new SendableChooser<>();
 
 
   /** The container for the robot. Contains subsystems, OI devices, and Commands. */
@@ -106,6 +110,60 @@ public class RobotContainer {
 
     // Configure the button bindings
     configureButtonBindings();
+    TrajectoryConfig config =
+            new TrajectoryConfig(
+                    Constants.AutoConstants.kMaxSpeedMetersPerSecond,
+                    Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared)
+                .setKinematics(Constants.Swerve.swerveKinematics);
+
+        //Trajectory's
+        /* 
+        Trajectory exampleTrajectory =
+            TrajectoryGenerator.generateTrajectory(
+                // Start at the origin facing the +X direction
+                new Pose2d(0, 0, new Rotation2d(0)),
+                // Pass through these two interior waypoints, making an 's' curve path
+                List.of(new Translation2d(1, 1), new Translation2d(2, -1), new Translation2d(3,0)),
+                // End 3 meters straight ahead of where we started, facing forward
+                new Pose2d(0, 0, new Rotation2d(0)),
+                config);
+          Trajectory moveOut =
+            TrajectoryGenerator.generateTrajectory(
+              new Pose2d(0, 0, new Rotation2d(0)),
+              List.of(new Translation2d(-2, 0)),
+              new Pose2d(-4, 0, new Rotation2d(Math.PI)),
+              config);
+          Trajectory moveBackClose = 
+            TrajectoryGenerator.generateTrajectory(
+              new Pose2d(-4, 0, new Rotation2d(Math.PI)),
+              List.of(),
+              new Pose2d(-1, 0, new Rotation2d(0)),
+              config);
+          Trajectory moveBackFinal = 
+            TrajectoryGenerator.generateTrajectory(
+              new Pose2d(-1, 0, new Rotation2d(Math.PI)),
+              List.of(),
+              new Pose2d(0, 0, new Rotation2d(0)),
+              config);
+
+        var thetaController =
+            new ProfiledPIDController(
+                Constants.AutoConstants.kPThetaController, 0, 0, Constants.AutoConstants.kThetaControllerConstraints);
+                thetaController.enableContinuousInput(-Math.PI, Math.PI);
+
+        new InstantCommand(() -> s_Swerve.resetOdometry(exampleTrajectory.getInitialPose()));
+        Command moveOutCommand = new SwerveControllerCommand(
+                moveOut,
+                s_Swerve::getPose,Constants.Swerve.swerveKinematics,new PIDController(Constants.AutoConstants.kPXController, 0, 0),
+                new PIDController(Constants.AutoConstants.kPYController, 0, 0),thetaController,s_Swerve::setModuleStates,s_Swerve);
+        */
+        m_Chooser.addOption("Nothing", new InstantCommand());
+        m_Chooser.addOption("Starting Drop", new AutoDropStart(arm));
+        m_Chooser.addOption("Low Drop", new AutoDropLowCone(arm));
+        //m_Chooser.addOption("Move Out",moveOutCommand);
+        m_Chooser.addOption("Pick Up Cone", new AutoPickUpCone(arm));
+
+        SmartDashboard.putData("Auto Chooser", m_Chooser);
   }
 
   /**
@@ -180,47 +238,14 @@ public class RobotContainer {
    *
    * @return the command to run in autonomous
    */
-  private static final String kDefaultAuto = "Default";
-  private static final String kCustomAuto = "My Auto";
-  private String m_autoSelected;
-  private final SendableChooser<String> m_Chooser = new SendableChooser<>();
+  
+
   public Command getAutonomousCommand() {
 
     // An ExampleCommand will run in autonomous
-      s_Swerve.zeroHeading();
-      s_Swerve.resetModulesToAbsolute();
-        TrajectoryConfig config =
-            new TrajectoryConfig(
-                    Constants.AutoConstants.kMaxSpeedMetersPerSecond,
-                    Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared)
-                .setKinematics(Constants.Swerve.swerveKinematics);
+        
 
-        // An example trajectory to follow.  All units in meters.
-        Trajectory exampleTrajectory =
-            TrajectoryGenerator.generateTrajectory(
-                // Start at the origin facing the +X direction
-                new Pose2d(0, 0, new Rotation2d(0)),
-                // Pass through these two interior waypoints, making an 's' curve path
-                List.of(new Translation2d(1, 1), new Translation2d(2, -1), new Translation2d(3,0)),
-                // End 3 meters straight ahead of where we started, facing forward
-                new Pose2d(0, 0, new Rotation2d(0)),
-                config);
-
-        var thetaController =
-            new ProfiledPIDController(
-                Constants.AutoConstants.kPThetaController, 0, 0, Constants.AutoConstants.kThetaControllerConstraints);
-                thetaController.enableContinuousInput(-Math.PI, Math.PI);
-
-        new InstantCommand(() -> s_Swerve.resetOdometry(exampleTrajectory.getInitialPose()));
-        return new SwerveControllerCommand(
-                exampleTrajectory,
-                s_Swerve::getPose,
-                Constants.Swerve.swerveKinematics,
-                new PIDController(Constants.AutoConstants.kPXController, 0, 0),
-                new PIDController(Constants.AutoConstants.kPYController, 0, 0),
-                thetaController,
-                s_Swerve::setModuleStates,
-                s_Swerve);
+        return m_Chooser.getSelected();
                 
 
     }
