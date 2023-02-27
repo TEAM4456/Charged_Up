@@ -100,6 +100,7 @@ public class RobotContainer {
 
 
   /** The container for the robot. Contains subsystems, OI devices, and Commands. */
+  public Command moveOutCommand;
   public RobotContainer() {
     s_Swerve.setDefaultCommand(
         new TeleopSwerve(
@@ -117,7 +118,7 @@ public class RobotContainer {
                 .setKinematics(Constants.Swerve.swerveKinematics);
 
         //Trajectory's
-        /* 
+        
         Trajectory exampleTrajectory =
             TrajectoryGenerator.generateTrajectory(
                 // Start at the origin facing the +X direction
@@ -151,19 +152,21 @@ public class RobotContainer {
                 Constants.AutoConstants.kPThetaController, 0, 0, Constants.AutoConstants.kThetaControllerConstraints);
                 thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
-        new InstantCommand(() -> s_Swerve.resetOdometry(exampleTrajectory.getInitialPose()));
-        Command moveOutCommand = new SwerveControllerCommand(
+        new InstantCommand(() -> s_Swerve.resetOdometry(moveOut.getInitialPose()));
+        moveOutCommand = new SwerveControllerCommand(
                 moveOut,
                 s_Swerve::getPose,Constants.Swerve.swerveKinematics,new PIDController(Constants.AutoConstants.kPXController, 0, 0),
                 new PIDController(Constants.AutoConstants.kPYController, 0, 0),thetaController,s_Swerve::setModuleStates,s_Swerve);
-        */
+        
         m_Chooser.addOption("Nothing", new InstantCommand());
-        m_Chooser.addOption("Starting Drop", new AutoDropStart(arm));
-        m_Chooser.addOption("Low Drop", new AutoDropLowCone(arm));
-        //m_Chooser.addOption("Move Out",moveOutCommand);
-        m_Chooser.addOption("Pick Up Cone", new AutoPickUpCone(arm));
+        //m_Chooser.addOption("Starting Drop", new AutoDropStart(arm));
+        //m_Chooser.addOption("Low Drop", new AutoDropLowCone(arm));
+        m_Chooser.addOption("Move Out",moveOutCommand);
+        //m_Chooser.addOption("Pick Up Cone", new AutoPickUpCone(arm));
 
         SmartDashboard.putData("Auto Chooser", m_Chooser);
+        
+        
   }
 
   /**
@@ -243,10 +246,57 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
 
     // An ExampleCommand will run in autonomous
-        
+        return null;
+    /*     TrajectoryConfig config =
+        new TrajectoryConfig(
+                Constants.AutoConstants.kMaxSpeedMetersPerSecond,
+                Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared)
+            .setKinematics(Constants.Swerve.swerveKinematics);
+    
+        Trajectory exampleTrajectory =
+        TrajectoryGenerator.generateTrajectory(
+            // Start at the origin facing the +X direction
+            new Pose2d(0, 0, new Rotation2d(0)),
+            // Pass through these two interior waypoints, making an 's' curve path
+            List.of(new Translation2d(1, 1), new Translation2d(2, -1), new Translation2d(3,0)),
+            // End 3 meters straight ahead of where we started, facing forward
+            new Pose2d(0, 0, new Rotation2d(0)),
+            config);
+     
+        Trajectory moveOut =
+        TrajectoryGenerator.generateTrajectory(
+          new Pose2d(0, 0, new Rotation2d(0)),
+          List.of(new Translation2d(-2, 0)),
+          new Pose2d(-4, 0, new Rotation2d(Math.PI)),
+          config);
+      Trajectory moveBackClose = 
+        TrajectoryGenerator.generateTrajectory(
+          new Pose2d(-4, 0, new Rotation2d(Math.PI)),
+          List.of(),
+          new Pose2d(-1, 0, new Rotation2d(0)),
+          config);
+      Trajectory moveBackFinal = 
+        TrajectoryGenerator.generateTrajectory(
+          new Pose2d(-1, 0, new Rotation2d(Math.PI)),
+          List.of(),
+          new Pose2d(0, 0, new Rotation2d(0)),
+          config);
+          
 
-        return m_Chooser.getSelected();
-                
+    var thetaController =
+        new ProfiledPIDController(
+            Constants.AutoConstants.kPThetaController, 0, 0, Constants.AutoConstants.kThetaControllerConstraints);
+            thetaController.enableContinuousInput(-Math.PI, Math.PI);
+
+    new InstantCommand(() -> s_Swerve.resetOdometry(moveOut.getInitialPose()));
+        return new SwerveControllerCommand(
+              moveOut,
+              s_Swerve::getPose,Constants.Swerve.swerveKinematics,new PIDController(Constants.AutoConstants.kPXController, 0, 0),
+                new PIDController(Constants.AutoConstants.kPYController, 0, 0),thetaController,s_Swerve::setModuleStates,s_Swerve);
+        
+       */
+  
+              
 
     }
       // This will load the file "Example Path.path" and generate it with a max

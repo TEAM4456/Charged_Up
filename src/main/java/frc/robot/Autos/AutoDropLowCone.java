@@ -8,6 +8,8 @@ public class AutoDropLowCone extends CommandBase{
     public final Arm arm;
     public AutoDropLowCone(Arm arm) {
         this.arm = arm;
+    }
+    public void execute(){
         arm.rotatePosition(Constants.armConstants.rotateLowCone);
         arm.elevatorPosition(Constants.armConstants.elevatorLowCone);
         Timer.delay(1);
