@@ -182,11 +182,11 @@ public class RobotContainer {
  //    driver.a().whileTrue(new moveUpCommand(arm));
 //    driver.y().whileTrue(new moveDownCommand(arm));
 //
-    driver.leftTrigger().whileTrue(new ClampOutLeft(arm));
-    driver.leftBumper().whileTrue(new ClampInLeft(arm));
+    second.leftTrigger().whileTrue(new ClampOutLeft(arm));
+    second.leftBumper().whileTrue(new ClampInLeft(arm));
 
-    driver.rightTrigger().whileTrue(new ClampOutRight(arm));
-    driver.rightBumper().whileTrue(new ClampInRight(arm));
+    second.rightTrigger().whileTrue(new ClampOutRight(arm));
+    second.rightBumper().whileTrue(new ClampInRight(arm));
 
     driver.start().whileTrue(new limeLightSwerve(s_Swerve));
     driver.back().toggleOnTrue(
@@ -202,11 +202,11 @@ public class RobotContainer {
     driver.x().whileTrue(new ElevatorIn(arm));
     driver.b().whileTrue(new ElevatorOut(arm));
 
-    second.leftTrigger().whileTrue(new ClampPositionCone(arm));
-    second.rightBumper().whileTrue(new ClampPositionDrop(arm));
-    second.rightTrigger().whileTrue(new ClampPositionCube(arm));
+    driver.leftTrigger().whileTrue(new ClampPositionCone(arm));
+    driver.rightBumper().whileTrue(new ClampPositionDrop(arm));
+    driver.rightTrigger().whileTrue(new ClampPositionCube(arm));
 
-    second.leftBumper().whileTrue(new Hybrid(arm));
+    driver.leftBumper().whileTrue(new Hybrid(arm));
     second.y().whileTrue(new HighCube(arm));
     second.x().whileTrue(new LowCone(arm));
     second.b().whileTrue(new HighCone(arm));
