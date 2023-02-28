@@ -244,9 +244,12 @@ public class RobotContainer {
   
 
   public Command getAutonomousCommand() {
-
+    s_Swerve.resetModulesToAbsolute();
+    s_Swerve.zeroHeading();
+    PathPlannerTrajectory examplePath = PathPlanner.loadPath("New Path", new PathConstraints(3, 2));
+    return s_Swerve.followTrajectoryCommand(examplePath,true);
     // An ExampleCommand will run in autonomous
-        return null;
+       // return m_Chooser.getSelected();
     /*     TrajectoryConfig config =
         new TrajectoryConfig(
                 Constants.AutoConstants.kMaxSpeedMetersPerSecond,

@@ -38,10 +38,10 @@ public final class Constants {
 
     public static final SwerveDriveKinematics swerveKinematics =
         new SwerveDriveKinematics(
-            new Translation2d(wheelBase / 2.0, trackWidth / 2.0),
-            new Translation2d(wheelBase / 2.0, -trackWidth / 2.0),
+            new Translation2d(-wheelBase / 2.0, -trackWidth / 2.0),
             new Translation2d(-wheelBase / 2.0, trackWidth / 2.0),
-            new Translation2d(-wheelBase / 2.0, -trackWidth / 2.0));
+            new Translation2d(wheelBase / 2.0, -trackWidth / 2.0),
+            new Translation2d(wheelBase / 2.0, trackWidth / 2.0));
 
     /* Swerve Voltage Compensation */
     public static final double voltageComp = 10.0;
@@ -168,12 +168,12 @@ public final class Constants {
     //Right Clamp Constants
     public static final double clampRightPickupCone = -2.5;
     public static final double clampRightPickupCube = -4.5;
-    public static final double clampRightDrop = -6.214;
+    public static final double clampRightDrop = -6.8;
     
     //Left Clamp Constants
     public static final double clampLeftPickupCone = 12;
     public static final double clampLeftPickupCube =10.8 ;
-    public static final double clampLeftDrop = 9.5238;
+    public static final double clampLeftDrop = 9.2;
 
   }
 }

@@ -20,6 +20,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Timer;
@@ -33,7 +34,7 @@ public class Swerve extends SubsystemBase {
   private SwerveDriveOdometry swerveOdometry;
   private SwerveModule[] mSwerveMods;
 
-  private Field2d field;
+  public Field2d field;
 
   public Swerve() {
     m_gyro = new AHRS(SPI.Port.kMXP);
@@ -56,7 +57,7 @@ public class Swerve extends SubsystemBase {
     field = new Field2d();
     SmartDashboard.putData("Field", field);
   }
-
+  
   public void drive(
       Translation2d translation, double rotation, /*boolean fieldRelative,*/ boolean isOpenLoop) {
     SwerveModuleState[] swerveModuleStates =
@@ -113,6 +114,10 @@ public class Swerve extends SubsystemBase {
 
   public void zeroHeading() {
     m_gyro.reset();
+    m_gyro.setAngleAdjustment(0);
+  }
+  public void setHeading(){
+    m_gyro.setAngleAdjustment(180);
   }
 
   public double getHeading() {
@@ -151,7 +156,7 @@ public Rotation2d getRotation2d() {
       }
   }
 
-  public Command followTrajectoryCommand(PathPlannerTrajectory traj, boolean isFirstPath) {
+  public CommandBase followTrajectoryCommand(PathPlannerTrajectory traj, boolean isFirstPath) {
    return new SequentialCommandGroup(
         new InstantCommand(() -> {
           // Reset odometry for the first path you run during auto
