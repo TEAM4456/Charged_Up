@@ -247,7 +247,7 @@ public class RobotContainer {
     s_Swerve.resetModulesToAbsolute();
     s_Swerve.zeroHeading();
     PathPlannerTrajectory examplePath = PathPlanner.loadPath("New Path", new PathConstraints(3, 2));
-    return s_Swerve.followTrajectoryCommand(examplePath,true);
+    return s_Swerve.followTrajectoryCommand(examplePath,false);
     // An ExampleCommand will run in autonomous
        // return m_Chooser.getSelected();
     /*     TrajectoryConfig config =
