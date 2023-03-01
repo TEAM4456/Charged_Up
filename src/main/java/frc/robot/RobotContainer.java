@@ -211,6 +211,7 @@ public class RobotContainer {
     second.x().whileTrue(new LowCone(arm));
     second.b().whileTrue(new HighCone(arm));
     second.a().whileTrue(new LowCube(arm));
+    second.back().toggleOnTrue(s_Swerve.autoBalanceContinuous());
 
 
 /* 
