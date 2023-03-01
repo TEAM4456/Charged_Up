@@ -8,6 +8,7 @@ import com.kauailabs.navx.frc.AHRS;
 import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.commands.*;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -33,6 +34,7 @@ public class Swerve extends SubsystemBase {
 
   private SwerveDriveOdometry swerveOdometry;
   private SwerveModule[] mSwerveMods;
+  private PIDController m_balancePID = new PIDController(2, 0, 0);
 
   public Field2d field;
 
@@ -178,7 +180,16 @@ public Rotation2d getRotation2d() {
     );
     }
     
-
+    public void autoBalance() {
+      m_balancePID.setTolerance(.1);
+      double pidOutput;
+      pidOutput = MathUtil.clamp(m_balancePID.calculate(m_gyro.getRoll(), 0), -0.4, 0.4);
+      drive(new Translation2d(-pidOutput, 0), 0.0, false);
+      SmartDashboard.putNumber("gyro PID output", pidOutput);
+    }
+    public CommandBase autoBalanceContinuous() {
+      return run(() -> autoBalance()).until(() -> Math.abs(m_gyro.getRoll()) < .5);
+    }
   @Override
   public void periodic() {
     swerveOdometry.update(getRotation2d(), getModulePositions());
