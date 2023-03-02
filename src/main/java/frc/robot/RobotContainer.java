@@ -209,9 +209,6 @@ public class RobotContainer {
 
     driver.leftBumper().whileTrue(new Hybrid(arm));
 
-    second.leftTrigger().whileTrue(new ClampOutLeft(arm));
-    second.leftBumper().whileTrue(new ClampInLeft(arm));
-
     second.leftTrigger().whileTrue(new ClampOut(arm));
     second.rightTrigger().whileTrue(new ClampIn(arm));
 
