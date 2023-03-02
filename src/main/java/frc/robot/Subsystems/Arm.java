@@ -146,6 +146,18 @@ public class Arm extends SubsystemBase {
   public void clampOutLeft(){
     clampLeftPID.setReference(clampEncoderLeft.getPosition() - 0.25,CANSparkMax.ControlType.kPosition);
   }
+  public void clampOut(){
+    clampLeftPID.setReference(clampEncoderLeft.getPosition() - 0.25,CANSparkMax.ControlType.kPosition);
+    clampRightPID.setReference(clampEncoderRight.getPosition() - 0.25,CANSparkMax.ControlType.kPosition);
+  }
+  public void clampIn(){
+    clampLeftPID.setReference(clampEncoderLeft.getPosition() + 0.25,CANSparkMax.ControlType.kPosition);
+    clampRightPID.setReference(clampEncoderRight.getPosition() + 0.25,CANSparkMax.ControlType.kPosition);
+  }
+  public void clampReset(){
+    clampLeftPID.setReference(0,CANSparkMax.ControlType.kPosition);
+    clampRightPID.setReference(0,CANSparkMax.ControlType.kPosition);
+  }
 
 //ELEVATOR CONTROLS
 /* 

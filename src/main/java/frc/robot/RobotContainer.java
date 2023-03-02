@@ -10,6 +10,7 @@ import java.util.List;
 import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
+import com.pathplanner.lib.PathPoint;
 import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -34,14 +35,17 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Commands.TeleopSwerve;
 import frc.robot.Commands.autoToPose;
+import frc.robot.Commands.drivePosition;
 import frc.robot.Commands.limeLightSwerve;
 import frc.robot.Subsystems.LimeLightSubsystem;
 import frc.robot.Subsystems.Swerve;
 import frc.robot.Autos.AutoDropLowCone;
 import frc.robot.Autos.AutoDropStart;
 import frc.robot.Autos.AutoPickUpCone;
+import frc.robot.Commands.ClampIn;
 import frc.robot.Commands.ClampInLeft;
 import frc.robot.Commands.ClampInRight;
+import frc.robot.Commands.ClampOut;
 import frc.robot.Commands.ClampOutLeft;
 import frc.robot.Commands.ClampOutRight;
 import frc.robot.Commands.ClampPositionCone;
@@ -49,6 +53,7 @@ import frc.robot.Commands.ClampPositionCube;
 import frc.robot.Commands.ClampPositionDrop;
 import frc.robot.Commands.pivotDownSpeed;
 import frc.robot.Commands.pivotUpSpeed;
+import frc.robot.Commands.reset;
 import frc.robot.Commands.rotateDown;
 import frc.robot.Commands.rotateUp;
 import frc.robot.Commands.toggleSpeed;
@@ -111,7 +116,7 @@ public class RobotContainer {
 
     // Configure the button bindings
     configureButtonBindings();
-    TrajectoryConfig config =
+/*     TrajectoryConfig config =
             new TrajectoryConfig(
                     Constants.AutoConstants.kMaxSpeedMetersPerSecond,
                     Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared)
@@ -166,7 +171,7 @@ public class RobotContainer {
 
         SmartDashboard.putData("Auto Chooser", m_Chooser);
         
-        
+  */     
   }
 
   /**
@@ -182,13 +187,9 @@ public class RobotContainer {
  //    driver.a().whileTrue(new moveUpCommand(arm));
 //    driver.y().whileTrue(new moveDownCommand(arm));
 //
-    second.leftTrigger().whileTrue(new ClampOutLeft(arm));
-    second.leftBumper().whileTrue(new ClampInLeft(arm));
 
-    second.rightTrigger().whileTrue(new ClampOutRight(arm));
-    second.rightBumper().whileTrue(new ClampInRight(arm));
 
-    driver.start().whileTrue(new limeLightSwerve(s_Swerve));
+    driver.back().whileTrue(s_Swerve.autoBalanceContinuous());
     driver.back().toggleOnTrue(
       new toggleSpeed(
         s_Swerve,
@@ -207,11 +208,23 @@ public class RobotContainer {
     driver.rightTrigger().whileTrue(new ClampPositionCube(arm));
 
     driver.leftBumper().whileTrue(new Hybrid(arm));
+
+    second.leftTrigger().whileTrue(new ClampOutLeft(arm));
+    second.leftBumper().whileTrue(new ClampInLeft(arm));
+
+    second.leftTrigger().whileTrue(new ClampOut(arm));
+    second.rightTrigger().whileTrue(new ClampIn(arm));
+
+    second.leftBumper().whileTrue(new drivePosition(arm));
+    second.rightBumper().whileTrue(new reset(arm));
+
+
+    //second.start().whileTrue(new limeLightSwerve(s_Swerve));
     second.y().whileTrue(new HighCube(arm));
     second.x().whileTrue(new LowCone(arm));
     second.b().whileTrue(new HighCone(arm));
     second.a().whileTrue(new LowCube(arm));
-    second.back().toggleOnTrue(s_Swerve.autoBalanceContinuous());
+    
 
 
 /* 
@@ -245,10 +258,39 @@ public class RobotContainer {
   
 
   public Command getAutonomousCommand() {
-    s_Swerve.resetModulesToAbsolute();
     s_Swerve.zeroHeading();
-    PathPlannerTrajectory examplePath = PathPlanner.loadPath("New Path", new PathConstraints(3, 2));
-    return s_Swerve.followTrajectoryCommand(examplePath,false);
+    s_Swerve.resetModulesToAbsolute();
+    //PathPlannerTrajectory examplePath = PathPlanner.loadPath("New Path", new PathConstraints(3, 2));
+    PathPlannerTrajectory traj = PathPlanner.generatePath(
+      new PathConstraints(3, 3),
+      new PathPoint(new Translation2d(0.0, 0.0), Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(0)), // position, heading(direction of travel), holonomic rotation
+      new PathPoint(new Translation2d(-5.0, 0.0), Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(0)) // position, heading(direction of travel), holonomic rotation
+     // new PathPoint(new Translation2d(1.0, 1.0), Rotation2d.fromDegrees(45), Rotation2d.fromDegrees(-90)) // position, heading(direction of travel), holonomic rotation
+      );
+    // This will load the file "Example Path.path" and generate it with a max
+    // velocity of 3 m/s and a max acceleration of 2 m/s^2
+
+    //s_Swerve.field.getObject("traj").setTrajectory(examplePath);
+
+    return new SequentialCommandGroup(
+     
+      new InstantCommand(() -> {
+            // Reset odometry for the first path you run during auto
+            s_Swerve.resetOdometry(traj.getInitialPose());
+
+        }, s_Swerve),
+
+        new PPSwerveControllerCommand(
+          traj,
+          s_Swerve::getPose, // Pose supplier
+          Constants.Swerve.swerveKinematics, // SwerveDriveKinematics
+          new PIDController(0, 0, 0), // X controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
+          new PIDController(0, 0, 0), // Y controller (usually the same values as X controller)
+          new PIDController(1, 0, 0), // Rotation controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
+          s_Swerve::setModuleStates, // Module states consumer
+          true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
+          s_Swerve // Requires this drive subsystem
+        ));
     // An ExampleCommand will run in autonomous
        // return m_Chooser.getSelected();
     /*     TrajectoryConfig config =
