@@ -198,11 +198,16 @@ public class RobotContainer {
     PathPlannerTrajectory traj = PathPlanner.generatePath(
       new PathConstraints(3, 3),
       new PathPoint(new Translation2d(0.0, 0.0), Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(0)), // position, heading(direction of travel), holonomic rotation
-      new PathPoint(new Translation2d(-5.0, 0.0), Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(0)) // position, heading(direction of travel), holonomic rotation
+      new PathPoint(new Translation2d(5.0, 0.0), Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(0)) // position, heading(direction of travel), holonomic rotation
      // new PathPoint(new Translation2d(1.0, 1.0), Rotation2d.fromDegrees(45), Rotation2d.fromDegrees(-90)) // position, heading(direction of travel), holonomic rotation
       );
-    // This will load the file "Example Path.path" and generate it with a max
-    // velocity of 3 m/s and a max acceleration of 2 m/s^2
+    PathPlannerTrajectory trajBalance = PathPlanner.generatePath(
+        new PathConstraints(3, 3),
+        new PathPoint(new Translation2d(0.0, 0.0), Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(0)), // position, heading(direction of travel), holonomic rotation
+        new PathPoint(new Translation2d(3.36, 0.0), Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(0)) // position, heading(direction of travel), holonomic rotation
+       // new PathPoint(new Translation2d(1.0, 1.0), Rotation2d.fromDegrees(45), Rotation2d.fromDegrees(-90)) // position, heading(direction of travel), holonomic rotation
+    );
+    
 
     //s_Swerve.field.getObject("traj").setTrajectory(examplePath);
 
@@ -213,9 +218,9 @@ public class RobotContainer {
             s_Swerve.resetOdometry(traj.getInitialPose());
 
         }, s_Swerve),
-
+        
         new PPSwerveControllerCommand(
-          traj,
+          traj,//trajBalance,
           s_Swerve::getPose, // Pose supplier
           Constants.Swerve.swerveKinematics, // SwerveDriveKinematics
           new PIDController(0, 0, 0), // X controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
@@ -224,9 +229,13 @@ public class RobotContainer {
           s_Swerve::setModuleStates, // Module states consumer
           true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
           s_Swerve // Requires this drive subsystem
-        ), new InstantCommand(()-> {
+        )
+        /*for auto balance for autonomous 
+        , new InstantCommand(()-> {
           s_Swerve.autoBalanceContinuous();
-        }));
+        })
+        */
+        );
  
     }   
 }
