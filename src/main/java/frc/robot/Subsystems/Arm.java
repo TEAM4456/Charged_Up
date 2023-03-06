@@ -144,8 +144,15 @@ public class Arm extends SubsystemBase {
     clampRightPID.setReference(clampEncoderRight.getPosition() + 0.25,CANSparkMax.ControlType.kPosition);
   }
   public void clampReset(){
-    clampLeftPID.setReference(0,CANSparkMax.ControlType.kPosition);
-    clampRightPID.setReference(0,CANSparkMax.ControlType.kPosition);
+    clampLeftPID.setReference(.25,CANSparkMax.ControlType.kPosition);
+    clampRightPID.setReference(.25,CANSparkMax.ControlType.kPosition);
+  }
+  public boolean nearTarget(double positionRight){
+    boolean isDone = false;
+    if(Math.abs(clampEncoderRight.getPosition() - positionRight) < .25){
+      isDone = true;
+    }
+    return isDone;
   }
 
 //ELEVATOR CONTROLS
@@ -164,14 +171,65 @@ public class Arm extends SubsystemBase {
     motor13.set(0);
     motor14.set(0);
   }
+  /* 
   public void elevatorPosition(double elevatorSetpoint) {
+    double speed = 0;
     if(elevatorSetpoint>(elevatorEncoderRight.getPosition())){
-      motor13.set(.5);
-      motor14.set(.5);
+      speed = .5;
     }
     else{
-      motor13.set(-.5);
-      motor14.set(-.5);
+      speed = -.5;
+    }
+    motor13.set(speed);
+    motor14.set(speed);
+    while((Math.abs(elevatorSetpoint-elevatorEncoderRight.getPosition()))< 5){
+      motor13.set(speed/2);
+      motor14.set(speed/2);
+    }
+    while((Math.abs(elevatorSetpoint-elevatorEncoderRight.getPosition()))< 3){
+      {
+        Timer.delay(.01);
+      }
+    }
+    motor13.set(0);
+    motor14.set(0);
+    elevatorRightPID.setReference(elevatorSetpoint,CANSparkMax.ControlType.kPosition);
+  }
+  */
+  public void setDrivePosition(){
+    elevatorPosition(Constants.armConstants.elevatorDrive);
+    rotatePosition(Constants.armConstants.rotateDrive);
+  }
+  public void setHybridPosition(){
+    elevatorPosition(Constants.armConstants.elevatorHybrid);
+    rotatePosition(Constants.armConstants.rotateHybrid);
+  }
+  public void setConeLowPosition(){
+    elevatorPosition(Constants.armConstants.elevatorLowCone);
+    rotatePosition(Constants.armConstants.rotateLowCone);
+  }
+  public void setConeHighPosition(){
+    rotatePosition(Constants.armConstants.rotateHighCone);
+    elevatorPosition(Constants.armConstants.elevatorHighCone);
+    
+  }
+  public void setCubeHighPosition(){
+    rotatePosition(Constants.armConstants.rotateHighCube);
+    elevatorPosition(Constants.armConstants.elevatorHighCube);
+  }
+  public void setCubeLowPosition(){
+    elevatorPosition(Constants.armConstants.elevatorLowCube);
+    rotatePosition(Constants.armConstants.rotateLowCube);
+  }
+
+  public void elevatorPosition(double elevatorSetpoint) {
+    if(elevatorSetpoint>(elevatorEncoderRight.getPosition())){
+      motor13.set(.75);
+      motor14.set(.75);
+    }
+    else{
+      motor13.set(-.75);
+      motor14.set(-.75);
     }
     while(
       !(elevatorSetpoint+3>elevatorEncoderRight.getPosition()) 
@@ -230,4 +288,5 @@ public class Arm extends SubsystemBase {
     SmartDashboard.putNumber("Rotate Temp", motor17.getMotorTemperature());
 
   }
+
 }

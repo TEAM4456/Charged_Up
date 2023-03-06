@@ -3,6 +3,7 @@ package frc.robot.Commands;
 
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.Constants;
 import frc.robot.Subsystems.Arm;
 
 public class ClampPositionDrop extends CommandBase{
@@ -15,4 +16,8 @@ public class ClampPositionDrop extends CommandBase{
         arm.clampRightPID.setP(.5);
         arm.clampOutPosition();
     }
+    @Override
+  public boolean isFinished() {
+    return arm.nearTarget(Constants.armConstants.clampRightDrop);
+  }
 }

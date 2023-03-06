@@ -117,6 +117,9 @@ public class Swerve extends SubsystemBase {
 
   public void zeroHeading() {
     m_gyro.reset();
+  }
+  public void zeroHeadingAdjust() {
+    m_gyro.reset();
     m_gyro.setAngleAdjustment(0);
   }
   public void setHeading(){
@@ -183,17 +186,17 @@ public Rotation2d getRotation2d() {
         )
     );
     }
-    
     public void autoBalance() {
       m_balancePID.setTolerance(.1);
       double pidOutput;
       pidOutput = MathUtil.clamp(m_balancePID.calculate(m_gyro.getRoll(), 0), -0.4, 0.4);
       drive(new Translation2d(-pidOutput, 0), 0.0, false);
       SmartDashboard.putNumber("gyro PID output", pidOutput);
+      System.out.println("ran");
     }
 
     public CommandBase autoBalanceContinuous() {
-      return run(() -> autoBalance()).until(() -> Math.abs(m_gyro.getRoll()) < .5);
+      return run(() -> autoBalance()).until(() -> Math.abs(m_gyro.getRoll()) < 0);
     }
 
   @Override

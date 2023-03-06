@@ -34,7 +34,7 @@ public class pivotUpSpeed extends CommandBase {
   @Override
   public void end(boolean interrupted) {
     arm.motor17.set(0);
-    Timer.delay(.5);
+    Timer.delay(.05);
     arm.rotateSpeedHold();
   }
 }

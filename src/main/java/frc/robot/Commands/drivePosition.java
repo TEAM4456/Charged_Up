@@ -11,8 +11,8 @@ public class drivePosition extends CommandBase{
         this.arm = arm;
     }
     public void execute() {
-        arm.rotatePosition(Constants.armConstants.rotateDrive);
         arm.elevatorPosition(Constants.armConstants.elevatorDrive);
+        arm.rotatePosition(Constants.armConstants.rotateDrive);
     }
 
 }

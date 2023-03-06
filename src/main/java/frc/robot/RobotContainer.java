@@ -39,9 +39,11 @@ import frc.robot.Commands.drivePosition;
 import frc.robot.Commands.limeLightSwerve;
 import frc.robot.Subsystems.LimeLightSubsystem;
 import frc.robot.Subsystems.Swerve;
+import frc.robot.Autos.AutoBalanceAuto;
 import frc.robot.Autos.AutoDropLowCone;
 import frc.robot.Autos.AutoDropStart;
 import frc.robot.Autos.AutoPickUpCone;
+import frc.robot.Commands.AutoBalanceSwerve;
 import frc.robot.Commands.ClampIn;
 import frc.robot.Commands.ClampInLeft;
 import frc.robot.Commands.ClampInRight;
@@ -53,7 +55,6 @@ import frc.robot.Commands.ClampPositionCube;
 import frc.robot.Commands.ClampPositionDrop;
 import frc.robot.Commands.pivotDownSpeed;
 import frc.robot.Commands.pivotUpSpeed;
-import frc.robot.Commands.reset;
 import frc.robot.Commands.rotateDown;
 import frc.robot.Commands.rotateUp;
 import frc.robot.Commands.toggleSpeed;
@@ -141,7 +142,7 @@ public class RobotContainer {
 //
 
 
-    driver.back().whileTrue(s_Swerve.autoBalanceContinuous());
+    driver.start().whileTrue(new AutoBalanceSwerve(s_Swerve));
     driver.back().toggleOnTrue(
       new toggleSpeed(
         s_Swerve,
@@ -159,20 +160,21 @@ public class RobotContainer {
     driver.rightBumper().whileTrue(new ClampPositionDrop(arm));
     driver.rightTrigger().whileTrue(new ClampPositionCube(arm));
 
-    driver.leftBumper().whileTrue(new Hybrid(arm));
+    driver.leftBumper().whileTrue(new InstantCommand(()-> arm.setHybridPosition()));
 
-    second.leftTrigger().whileTrue(new ClampOut(arm));
-    second.rightTrigger().whileTrue(new ClampIn(arm));
-
-    second.leftBumper().whileTrue(new drivePosition(arm));
-    second.rightBumper().whileTrue(new reset(arm));
+    //second.leftTrigger().whileTrue(new ClampOut(arm));
+    //second.rightTrigger().whileTrue(new ClampIn(arm));
+    second.leftBumper().whileTrue(new InstantCommand(()-> arm.setDrivePosition()));
+    //second.leftBumper().whileTrue(new drivePosition(arm));
+    //second.rightTrigger().whileTrue(new aj(arm));
 
 
     //second.start().whileTrue(new limeLightSwerve(s_Swerve));
-    second.y().whileTrue(new HighCube(arm));
-    second.x().whileTrue(new LowCone(arm));
-    second.b().whileTrue(new HighCone(arm));
-    second.a().whileTrue(new LowCube(arm));
+    second.y().whileTrue(new InstantCommand(()-> arm.setCubeHighPosition()));
+    second.x().whileTrue(new InstantCommand(()-> arm.setConeLowPosition()));
+    second.b().whileTrue(new InstantCommand(()-> arm.setConeHighPosition()));
+    second.a().whileTrue(new InstantCommand(()-> arm.setCubeLowPosition()));
+    second.start().whileTrue(new InstantCommand(()-> s_Swerve.zeroHeadingAdjust()));
     
 
 
@@ -198,13 +200,13 @@ public class RobotContainer {
     PathPlannerTrajectory traj = PathPlanner.generatePath(
       new PathConstraints(3, 3),
       new PathPoint(new Translation2d(0.0, 0.0), Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(0)), // position, heading(direction of travel), holonomic rotation
-      new PathPoint(new Translation2d(5.0, 0.0), Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(0)) // position, heading(direction of travel), holonomic rotation
+      new PathPoint(new Translation2d(-6.0, 0.0), Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(0)) // position, heading(direction of travel), holonomic rotation
      // new PathPoint(new Translation2d(1.0, 1.0), Rotation2d.fromDegrees(45), Rotation2d.fromDegrees(-90)) // position, heading(direction of travel), holonomic rotation
       );
     PathPlannerTrajectory trajBalance = PathPlanner.generatePath(
         new PathConstraints(3, 3),
         new PathPoint(new Translation2d(0.0, 0.0), Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(0)), // position, heading(direction of travel), holonomic rotation
-        new PathPoint(new Translation2d(3.36, 0.0), Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(0)) // position, heading(direction of travel), holonomic rotation
+        new PathPoint(new Translation2d(-3.36, 0.0), Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(0)) // position, heading(direction of travel), holonomic rotation
        // new PathPoint(new Translation2d(1.0, 1.0), Rotation2d.fromDegrees(45), Rotation2d.fromDegrees(-90)) // position, heading(direction of travel), holonomic rotation
     );
     
@@ -218,23 +220,22 @@ public class RobotContainer {
             s_Swerve.resetOdometry(traj.getInitialPose());
 
         }, s_Swerve),
+        new ClampPositionDrop(arm),
         
         new PPSwerveControllerCommand(
           traj,//trajBalance,
           s_Swerve::getPose, // Pose supplier
           Constants.Swerve.swerveKinematics, // SwerveDriveKinematics
-          new PIDController(0, 0, 0), // X controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
-          new PIDController(0, 0, 0), // Y controller (usually the same values as X controller)
-          new PIDController(1, 0, 0), // Rotation controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
+          new PIDController(Constants.AutoConstants.kPXController, 0, 0), // X controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
+          new PIDController(Constants.AutoConstants.kPYController, 0, 0), // Y controller (usually the same values as X controller)
+          new PIDController(Constants.AutoConstants.kPThetaController, 0, 0), // Rotation controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
           s_Swerve::setModuleStates, // Module states consumer
           true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
           s_Swerve // Requires this drive subsystem
         )
-        /*for auto balance for autonomous 
-        , new InstantCommand(()-> {
-          s_Swerve.autoBalanceContinuous();
-        })
-        */
+        //for auto balance for autonomous 
+        , new AutoBalanceSwerve(s_Swerve)
+        
         );
  
     }   
