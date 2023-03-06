@@ -160,20 +160,20 @@ public class RobotContainer {
     driver.rightBumper().whileTrue(new ClampPositionDrop(arm));
     driver.rightTrigger().whileTrue(new ClampPositionCube(arm));
 
-    driver.leftBumper().whileTrue(new InstantCommand(()-> arm.setHybridPosition()));
+    driver.leftBumper().onTrue(arm.setHybridPositionCommand());
 
     //second.leftTrigger().whileTrue(new ClampOut(arm));
     //second.rightTrigger().whileTrue(new ClampIn(arm));
-    second.leftBumper().whileTrue(new InstantCommand(()-> arm.setDrivePosition()));
-    //second.leftBumper().whileTrue(new drivePosition(arm));
+    second.leftBumper().onTrue(arm.setDrivePositionCommand());
+    second.rightBumper().onTrue(arm.setPickupPositionCommand());
     //second.rightTrigger().whileTrue(new aj(arm));
 
 
     //second.start().whileTrue(new limeLightSwerve(s_Swerve));
-    second.y().whileTrue(new InstantCommand(()-> arm.setCubeHighPosition()));
-    second.x().whileTrue(new InstantCommand(()-> arm.setConeLowPosition()));
-    second.b().whileTrue(new InstantCommand(()-> arm.setConeHighPosition()));
-    second.a().whileTrue(new InstantCommand(()-> arm.setCubeLowPosition()));
+    second.y().onTrue(arm.setCubeHighPositionCommand());
+    second.x().onTrue(arm.setConeLowPositionCommand());
+    second.b().onTrue(arm.setConeHighPositionCommand());
+    second.a().onTrue(arm.setCubeLowPositionCommand());
     second.start().whileTrue(new InstantCommand(()-> s_Swerve.zeroHeadingAdjust()));
     
 

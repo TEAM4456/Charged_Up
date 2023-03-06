@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants;
@@ -221,26 +222,52 @@ public class Arm extends SubsystemBase {
     elevatorPosition(Constants.armConstants.elevatorLowCube);
     rotatePosition(Constants.armConstants.rotateLowCube);
   }
-
+  public void setPickupPosition(){
+    elevatorPosition(Constants.armConstants.elevatorPickup);
+    rotatePosition(Constants.armConstants.rotatePickup);
+  }
+  public CommandBase setCubeHighPositionCommand(){
+    return run(() -> setCubeHighPosition()).until(() -> Math.abs(elevatorEncoderRight.getPosition() - Constants.armConstants.elevatorHighCube) < 1);
+  }
+  public CommandBase setConeHighPositionCommand(){
+    return run(() -> setConeHighPosition()).until(() -> Math.abs(elevatorEncoderRight.getPosition() - Constants.armConstants.elevatorHighCone) < 1);
+  }
+  public CommandBase setCubeLowPositionCommand(){
+    return run(() -> setCubeLowPosition()).until(() -> Math.abs(elevatorEncoderRight.getPosition() - Constants.armConstants.elevatorLowCube) < 1);
+  }
+  public CommandBase setConeLowPositionCommand(){
+    return run(() -> setConeLowPosition()).until(() -> Math.abs(elevatorEncoderRight.getPosition() - Constants.armConstants.elevatorLowCone) < 1);
+  }
+  public CommandBase setDrivePositionCommand(){
+    return run(() -> setDrivePosition()).until(() -> Math.abs(elevatorEncoderRight.getPosition() - Constants.armConstants.elevatorDrive) < 1);
+  }
+  public CommandBase setHybridPositionCommand(){
+    return run(() -> setHybridPosition()).until(() -> Math.abs(elevatorEncoderRight.getPosition() - Constants.armConstants.elevatorHybrid) < 1);
+  }
+  public CommandBase setPickupPositionCommand(){
+    return run(() -> setPickupPosition()).until(() -> Math.abs(elevatorEncoderRight.getPosition() - Constants.armConstants.elevatorPickup) < 1);
+  }
   public void elevatorPosition(double elevatorSetpoint) {
-    if(elevatorSetpoint>(elevatorEncoderRight.getPosition())){
+    if(elevatorSetpoint-3>elevatorEncoderRight.getPosition()){
       motor13.set(.75);
       motor14.set(.75);
+      System.out.println("go In");
     }
-    else{
+    else if(elevatorSetpoint+3<elevatorEncoderRight.getPosition()){
       motor13.set(-.75);
       motor14.set(-.75);
+      System.out.println("go Out");
     }
-    while(
-      !(elevatorSetpoint+3>elevatorEncoderRight.getPosition()) 
-      || 
-      !(elevatorEncoderRight.getPosition()>elevatorSetpoint-3))
-      {
-        Timer.delay(.05);
-      }
-    motor13.set(0);
-    motor14.set(0);
-    elevatorRightPID.setReference(elevatorSetpoint,CANSparkMax.ControlType.kPosition);
+    else{
+      motor13.set(0);
+      motor14.set(0);
+      elevatorRightPID.setReference(elevatorSetpoint,CANSparkMax.ControlType.kPosition);
+      System.out.println("setReferece");
+    }
+    
+  }
+  public double getElevatorEncoder(){
+    return elevatorEncoderRight.getPosition();
   }
 
 
