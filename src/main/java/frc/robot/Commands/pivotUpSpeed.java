@@ -22,7 +22,7 @@ public class pivotUpSpeed extends CommandBase {
   
   @Override
   public void execute() {
-    if(arm.rotateEncoder.getPosition()<1){
+    if(arm.rotateEncoder.getPosition()<5){
       arm.rotateSpeedHold();
     }
     else{
