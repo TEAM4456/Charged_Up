@@ -22,7 +22,11 @@ public class pivotUpSpeed extends CommandBase {
   
   @Override
   public void execute() {
+<<<<<<< HEAD
     if(arm.rotateEncoder.getPosition()<1){
+=======
+    if(arm.rotateEncoder.getPosition()<5){
+>>>>>>> master-temp
       arm.rotateSpeedHold();
     }
     else{
@@ -34,7 +38,11 @@ public class pivotUpSpeed extends CommandBase {
   @Override
   public void end(boolean interrupted) {
     arm.motor17.set(0);
+<<<<<<< HEAD
     Timer.delay(.5);
+=======
+    Timer.delay(.05);
+>>>>>>> master-temp
     arm.rotateSpeedHold();
   }
 }

@@ -128,6 +128,16 @@ public final class Constants {
       public static final SwerveModuleConstants constants =
           new SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset);
     }
+<<<<<<< HEAD
+=======
+
+    public int getGyroRoll() {
+      return 0;
+    }
+
+    public void autoBalance() {
+    }
+>>>>>>> master-temp
   }
 
   public static final class AutoConstants {
@@ -150,28 +160,51 @@ public final class Constants {
   public static final class armConstants {
     //Elevator Constants
     
+<<<<<<< HEAD
     public static final double elevatorHighCone = -97.15;
     public static final double elevatorHighCube = -67;
     public static final double elevatorLowCone = -26.10;
     public static final double elevatorLowCube = 0;
     public static final double elevatorHybrid = -11.9;
     public static final double elevatorDrive = 5;
+=======
+    public static final double elevatorHighCone = -80.35;
+    public static final double elevatorHighCube = -67;
+    public static final double elevatorLowCone = -26.10;
+    public static final double elevatorLowCube = 0;
+    public static final double elevatorHybrid = -14.5;
+    public static final double elevatorDrive = 0;
+    public static final double elevatorPickup = 0;
+>>>>>>> master-temp
 
     //Rotate Constants
     public static final double rotateHighCone = 181.7;
     public static final double rotateHighCube = 208.79;
     public static final double rotateLowCone = 212.37;
     public static final double rotateLowCube = 255;
+<<<<<<< HEAD
     public static final double rotateHybrid = 341.3;
     public static final double rotateDrive = 62;
 
     //Right Clamp Constants
     public static final double clampRightPickupCone = -1.9;
+=======
+    public static final double rotateHybrid = 355.3;
+    public static final double rotateDrive = 21;
+    public static final double rotatePickup = 0;
+
+    //Right Clamp Constants
+    public static final double clampRightPickupCone = -1.6;
+>>>>>>> master-temp
     public static final double clampRightPickupCube = -3;
     public static final double clampRightDrop = -4.5;
     
     //Left Clamp Constants
+<<<<<<< HEAD
     public static final double clampLeftPickupCone = 11.2;
+=======
+    public static final double clampLeftPickupCone = 11.5;
+>>>>>>> master-temp
     public static final double clampLeftPickupCube =10.8 ;
     public static final double clampLeftDrop = 9.09;
 

@@ -40,6 +40,10 @@ public class Swerve extends SubsystemBase {
 
   public Swerve() {
     m_gyro = new AHRS(SPI.Port.kMXP);
+<<<<<<< HEAD
+=======
+    m_gyro.setAngleAdjustment(180);
+>>>>>>> master-temp
     //.configFactoryDefault();
     zeroHeading();
 
@@ -116,6 +120,12 @@ public class Swerve extends SubsystemBase {
 
   public void zeroHeading() {
     m_gyro.reset();
+<<<<<<< HEAD
+=======
+  }
+  public void zeroHeadingAdjust() {
+    m_gyro.reset();
+>>>>>>> master-temp
     m_gyro.setAngleAdjustment(0);
   }
   public void setHeading(){
@@ -125,6 +135,12 @@ public class Swerve extends SubsystemBase {
   public double getHeading() {
     return Math.IEEEremainder(-m_gyro.getAngle(), 360);
 }
+<<<<<<< HEAD
+=======
+  public double getGyroRoll(){
+    return m_gyro.getRoll();
+  }
+>>>>>>> master-temp
 
   public Rotation2d getRotation2d() {
     return m_gyro.getRotation2d();
@@ -179,17 +195,30 @@ public Rotation2d getRotation2d() {
         )
     );
     }
+<<<<<<< HEAD
     
+=======
+>>>>>>> master-temp
     public void autoBalance() {
       m_balancePID.setTolerance(.1);
       double pidOutput;
       pidOutput = MathUtil.clamp(m_balancePID.calculate(m_gyro.getRoll(), 0), -0.4, 0.4);
       drive(new Translation2d(-pidOutput, 0), 0.0, false);
       SmartDashboard.putNumber("gyro PID output", pidOutput);
+<<<<<<< HEAD
     }
     public CommandBase autoBalanceContinuous() {
       return run(() -> autoBalance()).until(() -> Math.abs(m_gyro.getRoll()) < .5);
     }
+=======
+      System.out.println("ran");
+    }
+
+    public CommandBase autoBalanceContinuous() {
+      return run(() -> autoBalance()).until(() -> Math.abs(m_gyro.getRoll()) < 0);
+    }
+
+>>>>>>> master-temp
   @Override
   public void periodic() {
     swerveOdometry.update(getRotation2d(), getModulePositions());

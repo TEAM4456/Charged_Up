@@ -11,8 +11,13 @@ public class ClampPositionCone extends CommandBase{
         this.arm = arm;
     }
     public void execute() {
+<<<<<<< HEAD
         arm.clampRightPID.setP(1);
         arm.clampLeftPID.setP(1);
+=======
+        arm.clampRightPID.setP(3);
+        arm.clampLeftPID.setP(3);
+>>>>>>> master-temp
         arm.clampInPositionCone();
     }
 }
