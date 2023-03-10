@@ -44,11 +44,11 @@ public final class Constants {
             new Translation2d(-wheelBase / 2.0, -trackWidth / 2.0));
 
     /* Swerve Voltage Compensation */
-    public static final double voltageComp = 10.0;
+    public static final double voltageComp = 12.0;
 
     /* Swerve Current Limiting */
-    public static final int angleContinuousCurrentLimit = 15;
-    public static final int driveContinuousCurrentLimit = 30;
+    public static final int angleContinuousCurrentLimit = 25;
+    public static final int driveContinuousCurrentLimit = 40;
 
     /* Angle Motor PID Values */
     public static final double angleKP = 0.01;
@@ -74,8 +74,8 @@ public final class Constants {
     public static final double angleConversionFactor = 360.0 / angleGearRatio;
 
     /* Swerve Profiling Values */
-    public static final double maxSpeed = 3; // meters per second
-    public static final double maxAngularVelocity = 9.5;
+    public static final double maxSpeed = 3.5; // meters per second
+    public static final double maxAngularVelocity = 11.5;
 
     /* Neutral Modes */
     public static final IdleMode angleNeutralMode = IdleMode.kBrake;
@@ -94,7 +94,7 @@ public final class Constants {
       public static final int driveMotorID = 10;
       public static final int angleMotorID = 11;
       public static final int canCoderID = 12;
-      public static final Rotation2d angleOffset = Rotation2d.fromDegrees(56.074);
+      public static final Rotation2d angleOffset = Rotation2d.fromDegrees(54.074);
       public static final SwerveModuleConstants constants =
           new SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset);
     }
@@ -104,7 +104,7 @@ public final class Constants {
       public static final int driveMotorID = 1;
       public static final int angleMotorID = 2;
       public static final int canCoderID = 3;
-      public static final Rotation2d angleOffset = Rotation2d.fromDegrees(260.597);
+      public static final Rotation2d angleOffset = Rotation2d.fromDegrees(260.297);
       public static final SwerveModuleConstants constants =
           new SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset);
     }
@@ -114,7 +114,7 @@ public final class Constants {
       public static final int driveMotorID = 7;
       public static final int angleMotorID = 8;
       public static final int canCoderID = 9;
-      public static final Rotation2d angleOffset = Rotation2d.fromDegrees(286.787);
+      public static final Rotation2d angleOffset = Rotation2d.fromDegrees(280.787);
       public static final SwerveModuleConstants constants =
           new SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset);
     }
@@ -124,7 +124,7 @@ public final class Constants {
       public static final int driveMotorID = 4;
       public static final int angleMotorID = 5;
       public static final int canCoderID = 6;
-      public static final Rotation2d angleOffset = Rotation2d.fromDegrees(45.087);
+      public static final Rotation2d angleOffset = Rotation2d.fromDegrees(45.8);
       public static final SwerveModuleConstants constants =
           new SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset);
     }
@@ -145,7 +145,7 @@ public final class Constants {
 
     public static final double kPXController = 1;
     public static final double kPYController = 1;
-    public static final double kPThetaController = 1;
+    public static final double kPThetaController = .01;
 
     // Constraint for the motion profilied robot angle controller
     public static final TrapezoidProfile.Constraints kThetaControllerConstraints =
@@ -157,13 +157,13 @@ public final class Constants {
   public static final class armConstants {
     //Elevator Constants
     
-    public static final double elevatorHighCone = -80.35;
+    public static final double elevatorHighCone = -75.35;
     public static final double elevatorHighCube = -67;
     public static final double elevatorLowCone = -26.10;
     public static final double elevatorLowCube = 0;
     public static final double elevatorHybrid = -14.5;
-    public static final double elevatorDrive = 0;
-    public static final double elevatorPickup = 0;
+    public static final double elevatorDrive = -3;
+    public static final double elevatorPickup = -3;
 
     //Rotate Constants
     public static final double rotateHighCone = 181.7;
@@ -171,18 +171,18 @@ public final class Constants {
     public static final double rotateLowCone = 212.37;
     public static final double rotateLowCube = 255;
     public static final double rotateHybrid = 355.3;
-    public static final double rotateDrive = 21;
-    public static final double rotatePickup = 0;
+    public static final double rotateDrive = 10;
+    public static final double rotatePickup = 195;
 
     //Right Clamp Constants
-    public static final double clampRightPickupCone = -1.6;
-    public static final double clampRightPickupCube = -3;
-    public static final double clampRightDrop = -4.5;
+    public static final double clampRightPickupCone =12.85 ;
+    public static final double clampRightPickupCube = 11.5;
+    public static final double clampRightDrop = 10.05;
     
     //Left Clamp Constants
-    public static final double clampLeftPickupCone = 11.5;
-    public static final double clampLeftPickupCube =10.8 ;
-    public static final double clampLeftDrop = 9.09;
+    public static final double clampLeftPickupCone = 12.85;
+    public static final double clampLeftPickupCube =11.5 ;
+    public static final double clampLeftDrop = 10.05;
 
     //While Driving
     public static final double elevatorStowed = 0;

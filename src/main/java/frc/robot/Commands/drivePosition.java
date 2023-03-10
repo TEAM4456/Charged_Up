@@ -14,5 +14,11 @@ public class drivePosition extends CommandBase{
         arm.elevatorPosition(Constants.armConstants.elevatorDrive);
         arm.rotatePosition(Constants.armConstants.rotateDrive);
     }
+    public boolean isFinished() {
+        return 
+        (Math.abs(arm.elevatorEncoderRight.getPosition() - Constants.armConstants.elevatorDrive) < 1)
+        &&
+        (Math.abs(arm.rotateEncoder.getPosition() - Constants.armConstants.rotateDrive) < 1);
+      }
 
 }

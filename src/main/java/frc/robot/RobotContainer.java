@@ -65,7 +65,7 @@ import frc.robot.Commands.ClampOutRight;
 import frc.robot.Commands.ElevatorIn;
 import frc.robot.Commands.ElevatorOut;
 import frc.robot.Commands.HighCone;
-import frc.robot.Commands.HighCube;
+import frc.robot.Commands.HighCubeAuto;
 import frc.robot.Commands.Hybrid;
 import frc.robot.Commands.LowCone;
 import frc.robot.Commands.LowCube;
@@ -198,15 +198,18 @@ public class RobotContainer {
     s_Swerve.resetModulesToAbsolute();
     //PathPlannerTrajectory examplePath = PathPlanner.loadPath("New Path", new PathConstraints(3, 2));
     PathPlannerTrajectory traj = PathPlanner.generatePath(
-      new PathConstraints(3, 3),
-      new PathPoint(new Translation2d(0.0, 0.0), Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(0)), // position, heading(direction of travel), holonomic rotation
-      new PathPoint(new Translation2d(-6.0, 0.0), Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(0)) // position, heading(direction of travel), holonomic rotation
+      new PathConstraints(2,1),
+      new PathPoint(new Translation2d(0.0, 0.0), Rotation2d.fromDegrees(180), Rotation2d.fromDegrees(0)), // position, heading(direction of travel), holonomic rotation1),
+      new PathPoint(new Translation2d(4.5, 0), Rotation2d.fromDegrees(180), Rotation2d.fromDegrees(0)),
+      new PathPoint(new Translation2d(4.5, -2.0), Rotation2d.fromDegrees(180), Rotation2d.fromDegrees(0)) // position, heading(direction of travel), holonomic rotation
+      //new PathPoint(new Translation2d(0.0, 0.0), Rotation2d.fromDegrees(180), Rotation2d.fromDegrees(0)) // position, heading(direction of travel), holonomic rotation
      // new PathPoint(new Translation2d(1.0, 1.0), Rotation2d.fromDegrees(45), Rotation2d.fromDegrees(-90)) // position, heading(direction of travel), holonomic rotation
       );
+    
     PathPlannerTrajectory trajBalance = PathPlanner.generatePath(
-        new PathConstraints(3, 3),
-        new PathPoint(new Translation2d(0.0, 0.0), Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(0)), // position, heading(direction of travel), holonomic rotation
-        new PathPoint(new Translation2d(-3.36, 0.0), Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(0)) // position, heading(direction of travel), holonomic rotation
+        new PathConstraints(1, 1),
+        new PathPoint(new Translation2d(4.5, -2.0), Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(0)), // position, heading(direction of travel), holonomic rotation
+        new PathPoint(new Translation2d(3.0, -2.0), Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(0)) // position, heading(direction of travel), holonomic rotation
        // new PathPoint(new Translation2d(1.0, 1.0), Rotation2d.fromDegrees(45), Rotation2d.fromDegrees(-90)) // position, heading(direction of travel), holonomic rotation
     );
     
@@ -220,10 +223,24 @@ public class RobotContainer {
             s_Swerve.resetOdometry(traj.getInitialPose());
 
         }, s_Swerve),
+        new ClampPositionCube(arm),
+        new HighCubeAuto(arm),
         new ClampPositionDrop(arm),
+        new drivePosition(arm),
         
         new PPSwerveControllerCommand(
           traj,//trajBalance,
+          s_Swerve::getPose, // Pose supplier
+          Constants.Swerve.swerveKinematics, // SwerveDriveKinematics
+          new PIDController(Constants.AutoConstants.kPXController, 0, 0), // X controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
+          new PIDController(Constants.AutoConstants.kPYController, 0, 0), // Y controller (usually the same values as X controller)
+          new PIDController(Constants.AutoConstants.kPThetaController, 0, 0), // Rotation controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
+          s_Swerve::setModuleStates, // Module states consumer
+          true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
+          s_Swerve // Requires this drive subsystem
+        ),
+        new PPSwerveControllerCommand(
+          trajBalance,
           s_Swerve::getPose, // Pose supplier
           Constants.Swerve.swerveKinematics, // SwerveDriveKinematics
           new PIDController(Constants.AutoConstants.kPXController, 0, 0), // X controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
