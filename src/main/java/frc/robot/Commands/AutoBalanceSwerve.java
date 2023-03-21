@@ -34,8 +34,8 @@ public class AutoBalanceSwerve extends CommandBase {
   public void execute() {
     double translationVal = 0;
     double roll = s_Swerve.getGyroRoll();
-    if(Math.abs(roll)>.5){
-     translationVal = translationLimiter.calculate(-roll/150);
+    if(Math.abs(roll)>10){
+     translationVal = translationLimiter.calculate(-roll/115);
       SmartDashboard.putNumber("AutoBalance in Execute", roll);
     }
     

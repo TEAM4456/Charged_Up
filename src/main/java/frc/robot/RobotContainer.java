@@ -75,7 +75,7 @@ import frc.robot.Commands.ClampOutRight;
 import frc.robot.Commands.ElevatorIn;
 import frc.robot.Commands.ElevatorOut;
 import frc.robot.Commands.HighCone;
-import frc.robot.Commands.HighCube;
+import frc.robot.Commands.HighCubeAuto;
 import frc.robot.Commands.Hybrid;
 import frc.robot.Commands.LowCone;
 import frc.robot.Commands.LowCube;
@@ -127,79 +127,92 @@ public class RobotContainer {
 
     // Configure the button bindings
     configureButtonBindings();
-<<<<<<< HEAD
-/*     TrajectoryConfig config =
-            new TrajectoryConfig(
-                    Constants.AutoConstants.kMaxSpeedMetersPerSecond,
-                    Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared)
-                .setKinematics(Constants.Swerve.swerveKinematics);
 
-        //Trajectory's
         
-        Trajectory exampleTrajectory =
-            TrajectoryGenerator.generateTrajectory(
-                // Start at the origin facing the +X direction
-                new Pose2d(0, 0, new Rotation2d(0)),
-                // Pass through these two interior waypoints, making an 's' curve path
-                List.of(new Translation2d(1, 1), new Translation2d(2, -1), new Translation2d(3,0)),
-                // End 3 meters straight ahead of where we started, facing forward
-                new Pose2d(0, 0, new Rotation2d(0)),
-                config);
-          Trajectory moveOut =
-            TrajectoryGenerator.generateTrajectory(
-              new Pose2d(0, 0, new Rotation2d(0)),
-              List.of(new Translation2d(-2, 0)),
-              new Pose2d(-4, 0, new Rotation2d(Math.PI)),
-              config);
-          Trajectory moveBackClose = 
-            TrajectoryGenerator.generateTrajectory(
-              new Pose2d(-4, 0, new Rotation2d(Math.PI)),
-              List.of(),
-              new Pose2d(-1, 0, new Rotation2d(0)),
-              config);
-          Trajectory moveBackFinal = 
-            TrajectoryGenerator.generateTrajectory(
-              new Pose2d(-1, 0, new Rotation2d(Math.PI)),
-              List.of(),
-              new Pose2d(0, 0, new Rotation2d(0)),
-              config);
-
-        var thetaController =
-            new ProfiledPIDController(
-                Constants.AutoConstants.kPThetaController, 0, 0, Constants.AutoConstants.kThetaControllerConstraints);
-                thetaController.enableContinuousInput(-Math.PI, Math.PI);
-
-        new InstantCommand(() -> s_Swerve.resetOdometry(moveOut.getInitialPose()));
-        moveOutCommand = new SwerveControllerCommand(
-                moveOut,
-                s_Swerve::getPose,Constants.Swerve.swerveKinematics,new PIDController(Constants.AutoConstants.kPXController, 0, 0),
-                new PIDController(Constants.AutoConstants.kPYController, 0, 0),thetaController,s_Swerve::setModuleStates,s_Swerve);
-        
-=======
-
->>>>>>> master-temp
-        m_Chooser.addOption("Nothing", new InstantCommand());
-        //m_Chooser.addOption("Starting Drop", new AutoDropStart(arm));
-        //m_Chooser.addOption("Low Drop", new AutoDropLowCone(arm));
-        m_Chooser.addOption("Move Out",moveOutCommand);
-        //m_Chooser.addOption("Pick Up Cone", new AutoPickUpCone(arm));
-
-<<<<<<< HEAD
-        SmartDashboard.putData("Auto Chooser", m_Chooser);
-        
-  */     
-=======
-        SmartDashboard.putData("Auto Chooser", m_Chooser);  
->>>>>>> master-temp
   }
-
   /**
    * Use this method to define your button->command mappings. Buttons can be created by
    * instantiating a {@link GenericHID} or one of its subclasses ({@link
    * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
+  public Command autoMoveOut(){
+    PathPlannerTrajectory trajBack = PathPlanner.generatePath(
+      new PathConstraints(3,2),
+      new PathPoint(new Translation2d(0.0, 0.0), Rotation2d.fromDegrees(180), Rotation2d.fromDegrees(0)), // position, heading(direction of travel), holonomic rotation1),
+      new PathPoint(new Translation2d(5, 0), Rotation2d.fromDegrees(180), Rotation2d.fromDegrees(0))
+      //new PathPoint(new Translation2d(0.0, 0.0), Rotation2d.fromDegrees(180), Rotation2d.fromDegrees(0)) // position, heading(direction of travel), holonomic rotation
+     // new PathPoint(new Translation2d(1.0, 1.0), Rotation2d.fromDegrees(45), Rotation2d.fromDegrees(-90)) // position, heading(direction of travel), holonomic rotation
+      );
+    return new SequentialCommandGroup(
+     
+    new InstantCommand(() -> {
+          // Reset odometry for the first path you run during auto
+          s_Swerve.resetOdometry(trajBack.getInitialPose());
+
+      }, s_Swerve),
+      
+      new ClampPositionCube(arm),
+      new HighCubeAuto(arm),
+      new ClampPositionDrop(arm),
+      new drivePosition(arm),
+      new PPSwerveControllerCommand(
+        trajBack,
+        s_Swerve::getPose, // Pose supplier
+        Constants.Swerve.swerveKinematics, // SwerveDriveKinematics
+        new PIDController(Constants.AutoConstants.kPXController, 0, 0), // X controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
+        new PIDController(Constants.AutoConstants.kPYController, 0, 0), // Y controller (usually the same values as X controller)
+        new PIDController(Constants.AutoConstants.kPThetaController, 0, 0), // Rotation controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
+        s_Swerve::setModuleStates, // Module states consumer
+        true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
+        s_Swerve // Requires this drive subsystem
+      ), new AutoBalanceSwerve(s_Swerve)
+
+      );
+  }
+  public Command autoMoveBalance(){
+    PathPlannerTrajectory trajBackBalance = PathPlanner.generatePath(
+      new PathConstraints(3,2),
+      new PathPoint(new Translation2d(0.0, 0.0), Rotation2d.fromDegrees(180), Rotation2d.fromDegrees(0)), // position, heading(direction of travel), holonomic rotation1),
+      new PathPoint(new Translation2d(3.25, 0), Rotation2d.fromDegrees(180), Rotation2d.fromDegrees(0))
+      //new PathPoint(new Translation2d(0.0, 0.0), Rotation2d.fromDegrees(180), Rotation2d.fromDegrees(0)) // position, heading(direction of travel), holonomic rotation
+     // new PathPoint(new Translation2d(1.0, 1.0), Rotation2d.fromDegrees(45), Rotation2d.fromDegrees(-90)) // position, heading(direction of travel), holonomic rotation
+      );
+    return new SequentialCommandGroup(
+     
+    new InstantCommand(() -> {
+          // Reset odometry for the first path you run during auto
+          s_Swerve.resetOdometry(trajBackBalance.getInitialPose());
+
+      }, s_Swerve),
+      
+      new ClampPositionCube(arm),
+      new HighCubeAuto(arm),
+      new ClampPositionDrop(arm),
+      new drivePosition(arm),
+      new PPSwerveControllerCommand(
+        trajBackBalance,
+        s_Swerve::getPose, // Pose supplier
+        Constants.Swerve.swerveKinematics, // SwerveDriveKinematics
+        new PIDController(Constants.AutoConstants.kPXController, 0, 0), // X controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
+        new PIDController(Constants.AutoConstants.kPYController, 0, 0), // Y controller (usually the same values as X controller)
+        new PIDController(Constants.AutoConstants.kPThetaController, 0, 0), // Rotation controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
+        s_Swerve::setModuleStates, // Module states consumer
+        true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
+        s_Swerve // Requires this drive subsystem
+      ), new AutoBalanceSwerve(s_Swerve)
+
+      );
+  }
   private void configureButtonBindings() {
+        m_Chooser.addOption("Nothing", new InstantCommand());
+        //m_Chooser.addOption("Starting Drop", new AutoDropStart(arm));
+        //m_Chooser.addOption("Low Drop", new AutoDropLowCone(arm));
+        m_Chooser.addOption("Move Out",autoMoveOut());
+        m_Chooser.setDefaultOption("Move Balance",autoMoveBalance());
+        //m_Chooser.addOption("Pick Up Cone", new AutoPickUpCone(arm));
+
+        SmartDashboard.putData("Auto Chooser", m_Chooser);  
     /* Driver Buttons */
     //driver.x().onTrue(new InstantCommand(() -> s_Swerve.zeroHeading()));
     //driver.start().whileTrue(new limeLightSwerve(s_Swerve));
@@ -301,24 +314,36 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     s_Swerve.zeroHeading();
     s_Swerve.resetModulesToAbsolute();
+    return m_Chooser.getSelected();
+    /* 
     //PathPlannerTrajectory examplePath = PathPlanner.loadPath("New Path", new PathConstraints(3, 2));
     PathPlannerTrajectory traj = PathPlanner.generatePath(
-      new PathConstraints(3, 3),
-      new PathPoint(new Translation2d(0.0, 0.0), Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(0)), // position, heading(direction of travel), holonomic rotation
-<<<<<<< HEAD
-      new PathPoint(new Translation2d(-5.0, 0.0), Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(0)) // position, heading(direction of travel), holonomic rotation
+      new PathConstraints(2.5,2),
+      new PathPoint(new Translation2d(0.0, 0.0), Rotation2d.fromDegrees(180), Rotation2d.fromDegrees(0)), // position, heading(direction of travel), holonomic rotation1),
+      new PathPoint(new Translation2d(4.5, 0), Rotation2d.fromDegrees(180), Rotation2d.fromDegrees(0)),
+      new PathPoint(new Translation2d(4.5, -2.0), Rotation2d.fromDegrees(180), Rotation2d.fromDegrees(0)) // position, heading(direction of travel), holonomic rotation
+      //new PathPoint(new Translation2d(0.0, 0.0), Rotation2d.fromDegrees(180), Rotation2d.fromDegrees(0)) // position, heading(direction of travel), holonomic rotation
      // new PathPoint(new Translation2d(1.0, 1.0), Rotation2d.fromDegrees(45), Rotation2d.fromDegrees(-90)) // position, heading(direction of travel), holonomic rotation
       );
-    // This will load the file "Example Path.path" and generate it with a max
-    // velocity of 3 m/s and a max acceleration of 2 m/s^2
-=======
-      new PathPoint(new Translation2d(-6.0, 0.0), Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(0)) // position, heading(direction of travel), holonomic rotation
+      PathPlannerTrajectory trajBack = PathPlanner.generatePath(
+      new PathConstraints(3,2),
+      new PathPoint(new Translation2d(0.0, 0.0), Rotation2d.fromDegrees(180), Rotation2d.fromDegrees(0)), // position, heading(direction of travel), holonomic rotation1),
+      new PathPoint(new Translation2d(5, 0), Rotation2d.fromDegrees(180), Rotation2d.fromDegrees(0))
+      //new PathPoint(new Translation2d(0.0, 0.0), Rotation2d.fromDegrees(180), Rotation2d.fromDegrees(0)) // position, heading(direction of travel), holonomic rotation
      // new PathPoint(new Translation2d(1.0, 1.0), Rotation2d.fromDegrees(45), Rotation2d.fromDegrees(-90)) // position, heading(direction of travel), holonomic rotation
       );
+      PathPlannerTrajectory trajBackBalance = PathPlanner.generatePath(
+      new PathConstraints(3,2),
+      new PathPoint(new Translation2d(0.0, 0.0), Rotation2d.fromDegrees(180), Rotation2d.fromDegrees(0)), // position, heading(direction of travel), holonomic rotation1),
+      new PathPoint(new Translation2d(2.5, 0), Rotation2d.fromDegrees(180), Rotation2d.fromDegrees(0))
+      //new PathPoint(new Translation2d(0.0, 0.0), Rotation2d.fromDegrees(180), Rotation2d.fromDegrees(0)) // position, heading(direction of travel), holonomic rotation
+     // new PathPoint(new Translation2d(1.0, 1.0), Rotation2d.fromDegrees(45), Rotation2d.fromDegrees(-90)) // position, heading(direction of travel), holonomic rotation
+      );
+    
     PathPlannerTrajectory trajBalance = PathPlanner.generatePath(
-        new PathConstraints(3, 3),
-        new PathPoint(new Translation2d(0.0, 0.0), Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(0)), // position, heading(direction of travel), holonomic rotation
-        new PathPoint(new Translation2d(-3.36, 0.0), Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(0)) // position, heading(direction of travel), holonomic rotation
+        new PathConstraints(2, 1),
+        new PathPoint(new Translation2d(4.5, -2.0), Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(0)), // position, heading(direction of travel), holonomic rotation
+        new PathPoint(new Translation2d(2.6, -2.0), Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(0)) // position, heading(direction of travel), holonomic rotation
        // new PathPoint(new Translation2d(1.0, 1.0), Rotation2d.fromDegrees(45), Rotation2d.fromDegrees(-90)) // position, heading(direction of travel), holonomic rotation
     );
     
@@ -333,84 +358,14 @@ public class RobotContainer {
             s_Swerve.resetOdometry(traj.getInitialPose());
 
         }, s_Swerve),
-<<<<<<< HEAD
-
-        new PPSwerveControllerCommand(
-          traj,
-          s_Swerve::getPose, // Pose supplier
-          Constants.Swerve.swerveKinematics, // SwerveDriveKinematics
-          new PIDController(0, 0, 0), // X controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
-          new PIDController(0, 0, 0), // Y controller (usually the same values as X controller)
-          new PIDController(1, 0, 0), // Rotation controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
-          s_Swerve::setModuleStates, // Module states consumer
-          true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
-          s_Swerve // Requires this drive subsystem
-        ));
-    // An ExampleCommand will run in autonomous
-       // return m_Chooser.getSelected();
-    /*     TrajectoryConfig config =
-        new TrajectoryConfig(
-                Constants.AutoConstants.kMaxSpeedMetersPerSecond,
-                Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared)
-            .setKinematics(Constants.Swerve.swerveKinematics);
-    
-        Trajectory exampleTrajectory =
-        TrajectoryGenerator.generateTrajectory(
-            // Start at the origin facing the +X direction
-            new Pose2d(0, 0, new Rotation2d(0)),
-            // Pass through these two interior waypoints, making an 's' curve path
-            List.of(new Translation2d(1, 1), new Translation2d(2, -1), new Translation2d(3,0)),
-            // End 3 meters straight ahead of where we started, facing forward
-            new Pose2d(0, 0, new Rotation2d(0)),
-            config);
-     
-        Trajectory moveOut =
-        TrajectoryGenerator.generateTrajectory(
-          new Pose2d(0, 0, new Rotation2d(0)),
-          List.of(new Translation2d(-2, 0)),
-          new Pose2d(-4, 0, new Rotation2d(Math.PI)),
-          config);
-      Trajectory moveBackClose = 
-        TrajectoryGenerator.generateTrajectory(
-          new Pose2d(-4, 0, new Rotation2d(Math.PI)),
-          List.of(),
-          new Pose2d(-1, 0, new Rotation2d(0)),
-          config);
-      Trajectory moveBackFinal = 
-        TrajectoryGenerator.generateTrajectory(
-          new Pose2d(-1, 0, new Rotation2d(Math.PI)),
-          List.of(),
-          new Pose2d(0, 0, new Rotation2d(0)),
-          config);
-          
-
-    var thetaController =
-        new ProfiledPIDController(
-            Constants.AutoConstants.kPThetaController, 0, 0, Constants.AutoConstants.kThetaControllerConstraints);
-            thetaController.enableContinuousInput(-Math.PI, Math.PI);
-
-    new InstantCommand(() -> s_Swerve.resetOdometry(moveOut.getInitialPose()));
-        return new SwerveControllerCommand(
-              moveOut,
-              s_Swerve::getPose,Constants.Swerve.swerveKinematics,new PIDController(Constants.AutoConstants.kPXController, 0, 0),
-                new PIDController(Constants.AutoConstants.kPYController, 0, 0),thetaController,s_Swerve::setModuleStates,s_Swerve);
         
-       */
-  
-              
-
-    }
-      // This will load the file "Example Path.path" and generate it with a max
-      // velocity of 3 m/s and a max acceleration of 2 m/s^2
-
-      //s_Swerve.field.getObject("traj").setTrajectory(examplePath);
-
-         
-          
-  
-=======
+        new ClampPositionCube(arm),
+        new HighCubeAuto(arm),
         new ClampPositionDrop(arm),
+        new drivePosition(arm),
         
+         //with balance
+          
         new PPSwerveControllerCommand(
           traj,//trajBalance,
           s_Swerve::getPose, // Pose supplier
@@ -421,12 +376,52 @@ public class RobotContainer {
           s_Swerve::setModuleStates, // Module states consumer
           true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
           s_Swerve // Requires this drive subsystem
+        ),
+        new PPSwerveControllerCommand(
+          trajBalance,
+          s_Swerve::getPose, // Pose supplier
+          Constants.Swerve.swerveKinematics, // SwerveDriveKinematics
+          new PIDController(Constants.AutoConstants.kPXController, 0, 0), // X controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
+          new PIDController(Constants.AutoConstants.kPYController, 0, 0), // Y controller (usually the same values as X controller)
+          new PIDController(Constants.AutoConstants.kPThetaController, 0, 0), // Rotation controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
+          s_Swerve::setModuleStates, // Module states consumer
+          true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
+          s_Swerve // Requires this drive subsystem
+        ),
+        
+        //go back
+        new PPSwerveControllerCommand(
+          trajBack,
+          s_Swerve::getPose, // Pose supplier
+          Constants.Swerve.swerveKinematics, // SwerveDriveKinematics
+          new PIDController(Constants.AutoConstants.kPXController, 0, 0), // X controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
+          new PIDController(Constants.AutoConstants.kPYController, 0, 0), // Y controller (usually the same values as X controller)
+          new PIDController(Constants.AutoConstants.kPThetaController, 0, 0), // Rotation controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
+          s_Swerve::setModuleStates, // Module states consumer
+          true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
+          s_Swerve // Requires this drive subsystem
+        ),
+        
+        new PPSwerveControllerCommand(
+          trajBackBalance,
+          s_Swerve::getPose, // Pose supplier
+          Constants.Swerve.swerveKinematics, // SwerveDriveKinematics
+          new PIDController(Constants.AutoConstants.kPXController, 0, 0), // X controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
+          new PIDController(Constants.AutoConstants.kPYController, 0, 0), // Y controller (usually the same values as X controller)
+          new PIDController(Constants.AutoConstants.kPThetaController, 0, 0), // Rotation controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
+          s_Swerve::setModuleStates, // Module states consumer
+          true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
+          s_Swerve // Requires this drive subsystem
         )
+        
+        
+        
+        //go back balance
         //for auto balance for autonomous 
         , new AutoBalanceSwerve(s_Swerve)
-        
+  
         );
- 
+ */
     }   
 >>>>>>> master-temp
 }
