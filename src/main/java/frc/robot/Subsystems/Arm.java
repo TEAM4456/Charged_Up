@@ -87,13 +87,13 @@ public class Arm extends SubsystemBase {
     elevatorLeftPID.setFF(0);
 
     clampRightPID = motor15.getPIDController();
-    clampRightPID.setP(.75);
+    clampRightPID.setP(1);
     clampRightPID.setI(0);
     clampRightPID.setD(0);
     clampRightPID.setFF(0);
 
     clampLeftPID = motor16.getPIDController();
-    clampLeftPID.setP(.75);
+    clampLeftPID.setP(1);
     clampLeftPID.setI(0);
     clampLeftPID.setD(0);
     clampLeftPID.setFF(0);

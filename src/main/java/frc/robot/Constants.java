@@ -161,9 +161,9 @@ public final class Constants {
     public static final double elevatorHighCube = -67;
     public static final double elevatorLowCone = -26.10;
     public static final double elevatorLowCube = 0;
-    public static final double elevatorHybrid = -14.5;
+    public static final double elevatorHybrid = -11.5;
     public static final double elevatorDrive = -3;
-    public static final double elevatorPickup = -3;
+    public static final double elevatorPickup = -15;
 
     //Rotate Constants
     public static final double rotateHighCone = 181.7;
@@ -172,17 +172,17 @@ public final class Constants {
     public static final double rotateLowCube = 255;
     public static final double rotateHybrid = 355.3;
     public static final double rotateDrive = 10;
-    public static final double rotatePickup = 195;
+    public static final double rotatePickup = 205.5;
 
     //Right Clamp Constants
-    public static final double clampRightPickupCone =12.85 ;
-    public static final double clampRightPickupCube = 11.5;
-    public static final double clampRightDrop = 10.05;
+    public static final double clampRightPickupCone =13.6 ;
+    public static final double clampRightPickupCube = 12;
+    public static final double clampRightDrop = 10.25;
     
     //Left Clamp Constants
-    public static final double clampLeftPickupCone = 12.85;
-    public static final double clampLeftPickupCube =11.5 ;
-    public static final double clampLeftDrop = 10.05;
+    public static final double clampLeftPickupCone = 13.6;
+    public static final double clampLeftPickupCube =12 ;
+    public static final double clampLeftDrop = 10.25;
 
     //While Driving
     public static final double elevatorStowed = 0;
