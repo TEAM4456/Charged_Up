@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
@@ -127,6 +128,7 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   public Command autoMoveOut(){
+    /* */
     PathPlannerTrajectory trajBack = PathPlanner.generatePath(
       new PathConstraints(3,2),
       new PathPoint(new Translation2d(0.0, 0.0), Rotation2d.fromDegrees(180), Rotation2d.fromDegrees(0)), // position, heading(direction of travel), holonomic rotation1),
@@ -175,11 +177,8 @@ public class RobotContainer {
           s_Swerve.resetOdometry(trajBackBalance.getInitialPose());
 
       }, s_Swerve),
-      
-      new ClampPositionCube(arm),
-      new HighCubeAuto(arm),
-      new ClampPositionDrop(arm),
-      new drivePosition(arm),
+      Commands.parallel(new ClampPositionCube(arm),new HighCubeAuto(arm)),
+      Commands.parallel(new ClampPositionDrop(arm),new drivePosition(arm),
       new PPSwerveControllerCommand(
         trajBackBalance,
         s_Swerve::getPose, // Pose supplier
@@ -190,7 +189,8 @@ public class RobotContainer {
         s_Swerve::setModuleStates, // Module states consumer
         true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
         s_Swerve // Requires this drive subsystem
-      ), new AutoBalanceSwerve(s_Swerve)
+      ), new AutoBalanceSwerve(s_Swerve))
+      
 
       );
   }

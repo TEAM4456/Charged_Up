@@ -249,13 +249,13 @@ public class Arm extends SubsystemBase {
   }
   public void elevatorPosition(double elevatorSetpoint) {
     if(elevatorSetpoint-3>elevatorEncoderRight.getPosition()){
-      motor13.set(.75);
-      motor14.set(.75);
+      motor13.set(1);
+      motor14.set(1);
       System.out.println("go In");
     }
     else if(elevatorSetpoint+3<elevatorEncoderRight.getPosition()){
-      motor13.set(-.75);
-      motor14.set(-.75);
+      motor13.set(-1);
+      motor14.set(-1);
       System.out.println("go Out");
     }
     else{
