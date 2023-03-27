@@ -75,13 +75,13 @@ public class Arm extends SubsystemBase {
     rotateEncoder = motor17.getEncoder();
 
     elevatorRightPID = motor13.getPIDController();
-    elevatorRightPID.setP(1);
+    elevatorRightPID.setP(.1);
     elevatorRightPID.setI(0);
     elevatorRightPID.setD(0);
     elevatorRightPID.setFF(0);
 
     elevatorLeftPID = motor14.getPIDController();
-    elevatorLeftPID.setP(1);
+    elevatorLeftPID.setP(.1);
     elevatorLeftPID.setI(0);
     elevatorLeftPID.setD(0);
     elevatorLeftPID.setFF(0);
@@ -159,18 +159,19 @@ public class Arm extends SubsystemBase {
 //ELEVATOR CONTROLS
 
   public void elevatorSpeedIn(){
-    motor13.set(.2);
-    motor14.set(.2);
+    motor13.set(.05);
+    motor14.set(.05);
   }
 
   public void elevatorSpeedOut(){
-    motor13.set(-.2);
-    motor14.set(-.2);
+    motor13.set(-.05);
+    motor14.set(-.05);
   }
 
   public void elevatorSpeedStop(){
     motor13.set(0);
     motor14.set(0);
+    elevatorPosition(elevatorEncoderRight.getPosition());
   }
   /* 
   public void elevatorPosition(double elevatorSetpoint) {
@@ -248,20 +249,21 @@ public class Arm extends SubsystemBase {
     return run(() -> setPickupPosition()).until(() -> Math.abs(elevatorEncoderRight.getPosition() - Constants.armConstants.elevatorPickup) < 1);
   }
   public void elevatorPosition(double elevatorSetpoint) {
-    if(elevatorSetpoint-3>elevatorEncoderRight.getPosition()){
-      motor13.set(1);
-      motor14.set(1);
+    if(elevatorSetpoint-1>elevatorEncoderRight.getPosition()){
+      motor13.set(.25);
+      motor14.set(.25);
       System.out.println("go In");
     }
-    else if(elevatorSetpoint+3<elevatorEncoderRight.getPosition()){
-      motor13.set(-1);
-      motor14.set(-1);
+    else if(elevatorSetpoint+1<elevatorEncoderRight.getPosition()){
+      motor13.set(-.25);
+      motor14.set(-.25);
       System.out.println("go Out");
     }
     else{
       motor13.set(0);
       motor14.set(0);
       elevatorRightPID.setReference(elevatorSetpoint,CANSparkMax.ControlType.kPosition);
+      elevatorLeftPID.setReference(elevatorSetpoint,CANSparkMax.ControlType.kPosition);
       System.out.println("setReferece");
     }
     

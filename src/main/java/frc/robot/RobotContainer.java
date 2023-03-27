@@ -44,6 +44,7 @@ import frc.robot.Autos.AutoBalanceAuto;
 import frc.robot.Autos.AutoDropLowCone;
 import frc.robot.Autos.AutoDropStart;
 import frc.robot.Autos.AutoPickUpCone;
+import frc.robot.Autos.AutoStraight;
 import frc.robot.Commands.AutoBalanceSwerve;
 import frc.robot.Commands.ClampIn;
 import frc.robot.Commands.ClampInLeft;
@@ -102,6 +103,7 @@ public class RobotContainer {
   /* Subsystems */
   private final Swerve s_Swerve = new Swerve();
   private final Arm arm = new Arm();
+  private final LimeLightSubsystem limeLight = new LimeLightSubsystem(s_Swerve);
 
   private final SendableChooser<Command> m_Chooser = new SendableChooser<>();
 
@@ -177,8 +179,10 @@ public class RobotContainer {
           s_Swerve.resetOdometry(trajBackBalance.getInitialPose());
 
       }, s_Swerve),
-      Commands.parallel(new ClampPositionCube(arm),new HighCubeAuto(arm)),
-      Commands.parallel(new ClampPositionDrop(arm),new drivePosition(arm),
+      new ClampPositionCube(arm),
+      new HighCubeAuto(arm),
+      new ClampPositionDrop(arm),
+      new drivePosition(arm),
       new PPSwerveControllerCommand(
         trajBackBalance,
         s_Swerve::getPose, // Pose supplier
@@ -189,7 +193,7 @@ public class RobotContainer {
         s_Swerve::setModuleStates, // Module states consumer
         true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
         s_Swerve // Requires this drive subsystem
-      ), new AutoBalanceSwerve(s_Swerve))
+      ), new AutoBalanceSwerve(s_Swerve)
       
 
       );
@@ -235,7 +239,7 @@ public class RobotContainer {
     //second.rightTrigger().whileTrue(new ClampIn(arm));
     second.leftBumper().onTrue(arm.setDrivePositionCommand());
     second.rightBumper().onTrue(arm.setPickupPositionCommand());
-    //second.rightTrigger().whileTrue(new aj(arm));
+    second.rightTrigger().whileTrue(limeLight.autoPickupCommand());
 
 
     //second.start().whileTrue(new limeLightSwerve(s_Swerve));
@@ -243,7 +247,7 @@ public class RobotContainer {
     second.x().onTrue(arm.setConeLowPositionCommand());
     second.b().onTrue(arm.setConeHighPositionCommand());
     second.a().onTrue(arm.setCubeLowPositionCommand());
-    second.start().whileTrue(new InstantCommand(()-> s_Swerve.zeroHeadingAdjust()));
+    second.start().whileTrue(new AutoStraight(s_Swerve));
     
 
 
