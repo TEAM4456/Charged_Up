@@ -45,6 +45,7 @@ import frc.robot.Autos.AutoDropLowCone;
 import frc.robot.Autos.AutoDropStart;
 import frc.robot.Autos.AutoPickUpCone;
 import frc.robot.Autos.AutoStraight;
+import frc.robot.Autos.AutoStraightOpposite;
 import frc.robot.Commands.AutoBalanceSwerve;
 import frc.robot.Commands.ClampIn;
 import frc.robot.Commands.ClampInLeft;
@@ -199,7 +200,8 @@ public class RobotContainer {
   public Command pickUpSequence(){
     return new SequentialCommandGroup(
       Commands.parallel(new AutoStraight(s_Swerve), new ClampPositionDrop(arm)),
-      Commands.parallel(limeLight.autoPickupCommandGeneral(),new InstantCommand(()-> arm.setPickupRotatePosition())),
+      new InstantCommand(()-> arm.setPickupRotatePosition()),
+      limeLight.autoPickupCommandGeneral(),
       new AutoStraight(s_Swerve), 
       Commands.parallel(limeLight.autoPickupCommand(),arm.setPickupPositionCommand())
     );  
@@ -240,21 +242,17 @@ public class RobotContainer {
     driver.leftTrigger().whileTrue(new ClampPositionCone(arm));
     driver.rightBumper().whileTrue(new SequentialCommandGroup(
       new ClampPositionDrop(arm),
-      arm.setDrivePositionCommand()
+      new ClampPositionDrop(arm)
       ));
     driver.rightTrigger().onTrue(new ClampPositionCube(arm));
 
     driver.leftBumper().onTrue(arm.setHybridPositionCommand());
 
     second.leftTrigger().onTrue(pickUpSequence());
-    //second.rightTrigger().whileTrue(new ClampIn(arm));
+    second.rightTrigger().onTrue(new AutoStraightOpposite(s_Swerve));
     second.leftBumper().onTrue(arm.setDrivePositionCommand());
-    second.rightBumper().onTrue(
-      new SequentialCommandGroup(
-    new ClampPositionDrop(arm),
-    arm.setDrivePositionCommand()
-    ));
-    second.rightTrigger().whileTrue(limeLight.autoPickupCommand());
+    second.rightBumper().onTrue(arm.setDrivePositionCommand());
+    //second.rightTrigger().whileTrue(limeLight.autoPickupCommand());
 
 
     //second.start().whileTrue(new limeLightSwerve(s_Swerve));

@@ -108,7 +108,7 @@ public class LimeLightSubsystem extends SubsystemBase {
   }
   public CommandBase autoPickupCommand() {
     SmartDashboard.putBoolean("command ran", true);
-    return run(() -> autoPickUp()).until(() -> ((Math.abs(xRel-1.25)< 0) && Math.abs(yRel+.5) < 0));
+    return run(() -> autoPickUp()).until(() -> ((Math.abs(xRel-1.25)< .05) && Math.abs(yRel+.5) < 0.05));
   }
   public CommandBase autoPickupCommandGeneral() {
     SmartDashboard.putBoolean("command ran", true);
