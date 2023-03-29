@@ -227,6 +227,9 @@ public class Arm extends SubsystemBase {
     elevatorPosition(Constants.armConstants.elevatorPickup);
     rotatePosition(Constants.armConstants.rotatePickup);
   }
+  public void setPickupRotatePosition(){
+    rotatePosition(Constants.armConstants.rotatePickup);
+  }
   public CommandBase setCubeHighPositionCommand(){
     return run(() -> setCubeHighPosition()).until(() -> Math.abs(elevatorEncoderRight.getPosition() - Constants.armConstants.elevatorHighCube) < 1);
   }

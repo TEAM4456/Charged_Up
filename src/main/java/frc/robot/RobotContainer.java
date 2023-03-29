@@ -193,10 +193,18 @@ public class RobotContainer {
         s_Swerve::setModuleStates, // Module states consumer
         true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
         s_Swerve // Requires this drive subsystem
-      ), new AutoBalanceSwerve(s_Swerve)
-      
+      ), new AutoBalanceSwerve(s_Swerve));
+  
+  }  
+  public Command pickUpSequence(){
+    return new SequentialCommandGroup(
+      Commands.parallel(new AutoStraight(s_Swerve), new ClampPositionDrop(arm)),
+      Commands.parallel(limeLight.autoPickupCommandGeneral(),new InstantCommand(()-> arm.setPickupRotatePosition())),
+      new AutoStraight(s_Swerve), 
+      Commands.parallel(limeLight.autoPickupCommand(),arm.setPickupPositionCommand())
+    );  
 
-      );
+      
   }
   private void configureButtonBindings() {
         m_Chooser.addOption("Nothing", new InstantCommand());
@@ -230,15 +238,22 @@ public class RobotContainer {
     driver.b().whileTrue(new ElevatorOut(arm));
 
     driver.leftTrigger().whileTrue(new ClampPositionCone(arm));
-    driver.rightBumper().whileTrue(new ClampPositionDrop(arm));
-    driver.rightTrigger().whileTrue(new ClampPositionCube(arm));
+    driver.rightBumper().whileTrue(new SequentialCommandGroup(
+      new ClampPositionDrop(arm),
+      arm.setDrivePositionCommand()
+      ));
+    driver.rightTrigger().onTrue(new ClampPositionCube(arm));
 
     driver.leftBumper().onTrue(arm.setHybridPositionCommand());
 
-    //second.leftTrigger().whileTrue(new ClampOut(arm));
+    second.leftTrigger().onTrue(pickUpSequence());
     //second.rightTrigger().whileTrue(new ClampIn(arm));
     second.leftBumper().onTrue(arm.setDrivePositionCommand());
-    second.rightBumper().onTrue(arm.setPickupPositionCommand());
+    second.rightBumper().onTrue(
+      new SequentialCommandGroup(
+    new ClampPositionDrop(arm),
+    arm.setDrivePositionCommand()
+    ));
     second.rightTrigger().whileTrue(limeLight.autoPickupCommand());
 
 

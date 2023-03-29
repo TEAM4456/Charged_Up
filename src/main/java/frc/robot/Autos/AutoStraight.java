@@ -16,16 +16,18 @@ public class AutoStraight extends CommandBase {
 
   private SlewRateLimiter rotationLimiter = new SlewRateLimiter(3.0);
 
+  public double navRot;
   public AutoStraight(Swerve s_Swerve) {
     this.s_Swerve = s_Swerve;
     addRequirements(s_Swerve);
     //this.robotCentricSup = robotCentricSup;
+    navRot = s_Swerve.getHeading();
   }
 
   @Override
   public void execute() {
     /* Get Values, Deadband*/
-    double navRot = s_Swerve.getHeading();
+    navRot = s_Swerve.getHeading();
    
     if(navRot > 20){
       navRot = 10;
@@ -55,5 +57,9 @@ public class AutoStraight extends CommandBase {
         //!robotCentricSup.getAsBoolean(),
         true);
     }
+    
+  }
+  public boolean isFinished() {
+    return (Math.abs(navRot) < 1);
   }
 }
