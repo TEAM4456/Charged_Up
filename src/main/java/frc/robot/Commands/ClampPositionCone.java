@@ -3,6 +3,7 @@ package frc.robot.Commands;
 
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.Constants;
 import frc.robot.Subsystems.Arm;
 
 public class ClampPositionCone extends CommandBase{
@@ -15,4 +16,7 @@ public class ClampPositionCone extends CommandBase{
         arm.clampLeftPID.setP(2);
         arm.clampInPositionCone();
     }
+    public boolean isFinished() {
+        return arm.nearTarget(Constants.armConstants.clampRightPickupCube);
+      }
 }

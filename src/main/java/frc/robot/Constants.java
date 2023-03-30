@@ -175,13 +175,13 @@ public final class Constants {
     public static final double rotatePickup = 205;
 
     //Right Clamp Constants
-    public static final double clampRightPickupCone =53 ;
-    public static final double clampRightPickupCube = 47;
+    public static final double clampRightPickupCone =58 ;
+    public static final double clampRightPickupCube = 50;
     public static final double clampRightDrop = 41;
     
     //Left Clamp Constants
-    public static final double clampLeftPickupCone = 53;
-    public static final double clampLeftPickupCube =47 ;
+    public static final double clampLeftPickupCone = 58;
+    public static final double clampLeftPickupCube =50 ;
     public static final double clampLeftDrop = 41;
 
     //While Driving

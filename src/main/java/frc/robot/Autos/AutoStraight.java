@@ -62,4 +62,11 @@ public class AutoStraight extends CommandBase {
   public boolean isFinished() {
     return (Math.abs(navRot) < 1);
   }
+    @Override
+  public void end(boolean interrupted) {s_Swerve.drive(
+    new Translation2d(0,0).times(Constants.Swerve.maxSpeed),
+    0 * Constants.Swerve.maxAngularVelocity,
+    //!robotCentricSup.getAsBoolean(),
+    true);}
+  
 }

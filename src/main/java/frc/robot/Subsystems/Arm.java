@@ -150,7 +150,7 @@ public class Arm extends SubsystemBase {
   }
   public boolean nearTarget(double positionRight){
     boolean isDone = false;
-    if(Math.abs(clampEncoderRight.getPosition() - positionRight) < .25){
+    if(Math.abs(clampEncoderRight.getPosition() - positionRight) < 3){
       isDone = true;
     }
     return isDone;
@@ -202,6 +202,9 @@ public class Arm extends SubsystemBase {
     elevatorPosition(Constants.armConstants.elevatorDrive);
     rotatePosition(Constants.armConstants.rotateDrive);
   }
+  public void setHybridPositionRotate(){
+    rotatePosition(Constants.armConstants.rotateHybrid);
+  }
   public void setHybridPosition(){
     elevatorPosition(Constants.armConstants.elevatorHybrid);
     rotatePosition(Constants.armConstants.rotateHybrid);
@@ -231,25 +234,25 @@ public class Arm extends SubsystemBase {
     rotatePosition(Constants.armConstants.rotatePickup);
   }
   public CommandBase setCubeHighPositionCommand(){
-    return run(() -> setCubeHighPosition()).until(() -> Math.abs(elevatorEncoderRight.getPosition() - Constants.armConstants.elevatorHighCube) < 1);
+    return run(() -> setCubeHighPosition()).until(() -> Math.abs(elevatorEncoderRight.getPosition() - Constants.armConstants.elevatorHighCube) < 1 && Math.abs(rotateEncoder.getPosition() - Constants.armConstants.rotateHighCube) < 1);
   }
   public CommandBase setConeHighPositionCommand(){
-    return run(() -> setConeHighPosition()).until(() -> Math.abs(elevatorEncoderRight.getPosition() - Constants.armConstants.elevatorHighCone) < 1);
+    return run(() -> setConeHighPosition()).until(() -> Math.abs(elevatorEncoderRight.getPosition() - Constants.armConstants.elevatorHighCone) < 1 && Math.abs(rotateEncoder.getPosition() - Constants.armConstants.rotateHighCone) < 1);
   }
   public CommandBase setCubeLowPositionCommand(){
-    return run(() -> setCubeLowPosition()).until(() -> Math.abs(elevatorEncoderRight.getPosition() - Constants.armConstants.elevatorLowCube) < 1);
+    return run(() -> setCubeLowPosition()).until(() -> Math.abs(elevatorEncoderRight.getPosition() - Constants.armConstants.elevatorLowCube) < 1 && Math.abs(rotateEncoder.getPosition() - Constants.armConstants.rotateLowCube) < 1);
   }
   public CommandBase setConeLowPositionCommand(){
-    return run(() -> setConeLowPosition()).until(() -> Math.abs(elevatorEncoderRight.getPosition() - Constants.armConstants.elevatorLowCone) < 1);
+    return run(() -> setConeLowPosition()).until(() -> Math.abs(elevatorEncoderRight.getPosition() - Constants.armConstants.elevatorLowCone) < 1 && Math.abs(rotateEncoder.getPosition() - Constants.armConstants.rotateLowCone) < 1);
   }
   public CommandBase setDrivePositionCommand(){
-    return run(() -> setDrivePosition()).until(() -> Math.abs(elevatorEncoderRight.getPosition() - Constants.armConstants.elevatorDrive) < 1);
+    return run(() -> setDrivePosition()).until(() -> Math.abs(elevatorEncoderRight.getPosition() - Constants.armConstants.elevatorDrive) < 1 && Math.abs(rotateEncoder.getPosition() - Constants.armConstants.rotateDrive) < 1);
   }
   public CommandBase setHybridPositionCommand(){
-    return run(() -> setHybridPosition()).until(() -> Math.abs(elevatorEncoderRight.getPosition() - Constants.armConstants.elevatorHybrid) < 1);
+    return run(() -> setHybridPosition()).until(() -> Math.abs(elevatorEncoderRight.getPosition() - Constants.armConstants.elevatorHybrid) < 1 && Math.abs(rotateEncoder.getPosition() - Constants.armConstants.rotateHybrid) < 1);
   }
   public CommandBase setPickupPositionCommand(){
-    return run(() -> setPickupPosition()).until(() -> Math.abs(elevatorEncoderRight.getPosition() - Constants.armConstants.elevatorPickup) < 1);
+    return run(() -> setPickupPosition()).until(() -> Math.abs(elevatorEncoderRight.getPosition() - Constants.armConstants.elevatorPickup) < 1 && Math.abs(rotateEncoder.getPosition() - Constants.armConstants.rotatePickup) < 1);
   }
   public void elevatorPosition(double elevatorSetpoint) {
     if(elevatorSetpoint-1>elevatorEncoderRight.getPosition()){
