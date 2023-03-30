@@ -199,6 +199,41 @@ public Rotation2d getRotation2d() {
       return run(() -> autoBalance()).until(() -> Math.abs(m_gyro.getRoll()) < 0);
     }
 
+    public void driveTo(double locationX, double locationY){
+      Pose2d locationList = field.getRobotPose();
+      double currentX= locationList.getX();
+      double currentY = locationList.getY();
+      double targetX = currentX - locationX;
+      double targetY = currentY - locationY;
+
+      if(targetX > 2){
+        targetX = 2;
+      }else if(targetX > 1){
+        targetX = 1;
+      }
+      else if(targetX < -2){
+        targetX = -2;
+      }
+      else if(targetX < -1){
+        targetX = -1;
+      }
+
+      if(targetY > 2){
+        targetY = 2;
+      }else if(targetY > 1){
+        targetY = 1;
+      }
+      else if(targetY < -2){
+        targetY = -2;
+      }
+      else if(targetY < -1){
+        targetY = -1;
+      }
+      drive(new Translation2d(targetX,targetY), 0, false);
+
+
+
+    }
   @Override
   public void periodic() {
     swerveOdometry.update(getRotation2d(), getModulePositions());
