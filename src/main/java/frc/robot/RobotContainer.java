@@ -41,9 +41,6 @@ import frc.robot.Commands.limeLightSwerve;
 import frc.robot.Subsystems.LimeLightSubsystem;
 import frc.robot.Subsystems.Swerve;
 import frc.robot.Autos.AutoBalanceAuto;
-import frc.robot.Autos.AutoDropLowCone;
-import frc.robot.Autos.AutoDropStart;
-import frc.robot.Autos.AutoPickUpCone;
 import frc.robot.Autos.AutoStraight;
 import frc.robot.Autos.AutoStraightOpposite;
 import frc.robot.Commands.AutoBalanceSwerve;
@@ -62,6 +59,7 @@ import frc.robot.Commands.rotateDown;
 import frc.robot.Commands.rotateUp;
 import frc.robot.Commands.toggleSpeed;
 import frc.robot.Subsystems.Arm;
+import frc.robot.Subsystems.ClampSubsystem;
 import frc.robot.Commands.ClampInRight;
 import frc.robot.Commands.ClampOutRight;
 
@@ -102,9 +100,10 @@ public class RobotContainer {
  //     new JoystickButton(driver, XboxController.Button.kLeftBumper.value);
 
   /* Subsystems */
-  private final Swerve s_Swerve = new Swerve();
   private final Arm arm = new Arm();
+  private final Swerve s_Swerve = new Swerve(arm);
   private final LimeLightSubsystem limeLight = new LimeLightSubsystem(s_Swerve);
+  private final ClampSubsystem clampSub = new ClampSubsystem();
 
   private final SendableChooser<Command> m_Chooser = new SendableChooser<>();
 
@@ -147,9 +146,9 @@ public class RobotContainer {
 
       }, s_Swerve),
       
-      new ClampPositionCube(arm),
+      new ClampPositionCube(clampSub),
       new HighCubeAuto(arm),
-      new ClampPositionDrop(arm),
+      new ClampPositionDrop(clampSub),
       new drivePosition(arm),
       new PPSwerveControllerCommand(
         trajBack,
@@ -180,9 +179,9 @@ public class RobotContainer {
           s_Swerve.resetOdometry(trajBackBalance.getInitialPose());
 
       }, s_Swerve),
-      new ClampPositionCube(arm),
+      new ClampPositionCube(clampSub),
       new HighCubeAuto(arm),
-      new ClampPositionDrop(arm),
+      new ClampPositionDrop(clampSub),
       new drivePosition(arm),
       new PPSwerveControllerCommand(
         trajBackBalance,
@@ -212,9 +211,9 @@ public class RobotContainer {
               s_Swerve.resetOdometry(trajBackBalance.getInitialPose());
     
           }, s_Swerve),
-          new ClampPositionCube(arm),
+          Commands.parallel(new ClampPositionCube(clampSub),new InstantCommand(() -> arm.sethighCubeRotate())),
           new HighCubeAuto(arm),
-          new ClampPositionDrop(arm),
+          new ClampPositionDrop(clampSub),
           Commands.parallel(new drivePosition(arm),
           new PPSwerveControllerCommand(
             trajBackBalance,
@@ -244,16 +243,8 @@ Trajectory trajStart =
         // Pass through these two interior waypoints, making an 's' curve path
         List.of(new Translation2d(-2, 0)),
         // End 3 meters straight ahead of where we started, facing forward
-        new Pose2d(-4.60,0, new Rotation2d(Math.PI)),
+        new Pose2d(-4.30,0, new Rotation2d(Math.PI)),
         config);
-        PathPlannerTrajectory trajEnd = PathPlanner.generatePath(
-          new PathConstraints(2,2),
-          new PathPoint(new Translation2d(4.4, 0.0), Rotation2d.fromDegrees(180), Rotation2d.fromDegrees(0)), // position, heading(direction of travel), holonomic rotation1),
-          new PathPoint(new Translation2d(1, 0), Rotation2d.fromDegrees(180), Rotation2d.fromDegrees(0))
-          //new PathPoint(new Translation2d(0.0, 0.0), Rotation2d.fromDegrees(180), Rotation2d.fromDegrees(0)) // position, heading(direction of travel), holonomic rotation
-         // new PathPoint(new Translation2d(1.0, 1.0), Rotation2d.fromDegrees(45), Rotation2d.fromDegrees(-90)) // position, heading(direction of travel), holonomic rotation
-          );
-
 var thetaController =
     new ProfiledPIDController(
         Constants.AutoConstants.kPThetaController, 0, 0, Constants.AutoConstants.kThetaControllerConstraints);
@@ -261,10 +252,11 @@ var thetaController =
 
 new InstantCommand(() -> s_Swerve.resetOdometry(trajStart.getInitialPose()));
 return new SequentialCommandGroup(
-  new ClampPositionCube(arm),
+  Commands.parallel(new ClampPositionCube(clampSub),new InstantCommand(() -> arm.sethighCubeRotate())),
   new HighCubeAuto(arm),
-  new ClampPositionDrop(arm),
-  Commands.parallel(arm.setDrivePositionCommand(),
+  new ClampPositionDrop(clampSub), 
+  arm.bringElevatorInCommand(),
+  Commands.parallel(new InstantCommand(()-> arm.setHybridPositionRotate()),
   new SwerveControllerCommand(
         trajStart,
         s_Swerve::getPose,
@@ -276,25 +268,31 @@ return new SequentialCommandGroup(
         s_Swerve)),
         
     new AutoStraight(s_Swerve),
-    arm.setHybridPositionCommand(),
-    new ClampPositionCone(arm),
-    Commands.parallel(arm.setDrivePositionCommand(),new AutoStraightOpposite(s_Swerve)),
-    new PPSwerveControllerCommand(
-        trajEnd,
-        s_Swerve::getPose, // Pose supplier
-        Constants.Swerve.swerveKinematics, // SwerveDriveKinematics
-        new PIDController(Constants.AutoConstants.kPXController, 0, 0), // X controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
-        new PIDController(Constants.AutoConstants.kPYController, 0, 0), // Y controller (usually the same values as X controller)
-        new PIDController(Constants.AutoConstants.kPThetaController, 0, 0), // Rotation controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
-        s_Swerve::setModuleStates, // Module states consumer
-        true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
-        s_Swerve // Requires this drive subsystem
-));
+    Commands.parallel(arm.setHybridPositionCommand(),s_Swerve.driveToCommand(-4.45,0)),
+    new ClampPositionCone(clampSub),
+    Commands.parallel(new InstantCommand(()-> arm.sethighConeRotate()),new AutoStraightOpposite(s_Swerve)),
+    s_Swerve.driveToCommand(-.5,0)
+    );
         
+  }
+  public Command testMove2(){
+    return new SequentialCommandGroup(
+  Commands.parallel(new ClampPositionCube(clampSub),new InstantCommand(() -> arm.sethighCubeRotate())),
+  new HighCubeAuto(arm),
+  Commands.parallel(new ClampPositionDrop(clampSub),arm.bringElevatorInCommand()),
+  s_Swerve.driveToCommand(-4,0),
+  new AutoStraight(s_Swerve),
+  s_Swerve.driveToCommand(-4.45,-.25),
+  Commands.parallel(new AutoStraight(s_Swerve), arm.setHybridPositionCommand()),
+  new ClampPositionCone(clampSub),
+  Commands.parallel(new InstantCommand(() -> arm.sethighConeRotate()), new AutoStraightOpposite(s_Swerve)),
+  Commands.parallel(s_Swerve.driveToCommandGeneral(-.5,0),arm.setConeHighPositionCommand())
+  );
+
   }
   public Command pickUpSequence(){
     return new SequentialCommandGroup(
-      Commands.parallel(new AutoStraight(s_Swerve), new ClampPositionDrop(arm)),
+      Commands.parallel(new AutoStraight(s_Swerve), new ClampPositionDrop(clampSub)),
       new InstantCommand(()-> arm.setPickupRotatePosition()),
       limeLight.autoPickupCommandGeneral(),
       new AutoStraight(s_Swerve), 
@@ -311,6 +309,7 @@ return new SequentialCommandGroup(
         m_Chooser.addOption("Move Balance",autoMoveBalance());
         m_Chooser.addOption("Move Balance Quick",autoMoveBalanceQuick());
         m_Chooser.setDefaultOption("test",testMove());
+        m_Chooser.addOption("test2",testMove2());
         //m_Chooser.addOption("Pick Up Cone", new AutoPickUpCone(arm));
 
         SmartDashboard.putData("Auto Chooser", m_Chooser);  
@@ -336,9 +335,9 @@ return new SequentialCommandGroup(
     driver.x().whileTrue(new ElevatorIn(arm));
     driver.b().whileTrue(new ElevatorOut(arm));
 
-    driver.leftTrigger().whileTrue(new ClampPositionCone(arm));
-    driver.rightBumper().whileTrue(new ClampPositionDrop(arm));
-    driver.rightTrigger().onTrue(new ClampPositionCube(arm));
+    driver.leftTrigger().whileTrue(new ClampPositionCone(clampSub));
+    driver.rightBumper().whileTrue(new ClampPositionDrop(clampSub));
+    driver.rightTrigger().onTrue(new ClampPositionCube(clampSub));
 
     driver.leftBumper().onTrue(arm.setHybridPositionCommand());
 

@@ -54,7 +54,7 @@ public class AutoStraightOpposite extends CommandBase {
     
     if(Math.abs(navRot) < 20){
     double rotationVal =
-        rotationLimiter.calculate(navRot/50);
+        rotationLimiter.calculate(navRot/65);
 
     /* Drive */
     s_Swerve.drive(
@@ -66,6 +66,11 @@ public class AutoStraightOpposite extends CommandBase {
     
   }
   public boolean isFinished() {
-    return (Math.abs(navRot) > 179);
+    return (Math.abs(s_Swerve.getHeading()) > 179);
   }
+  public void end(boolean interrupted) {s_Swerve.drive(
+    new Translation2d(0,0).times(Constants.Swerve.maxSpeed),
+    0 * Constants.Swerve.maxAngularVelocity,
+    //!robotCentricSup.getAsBoolean(),
+    true);}
 }

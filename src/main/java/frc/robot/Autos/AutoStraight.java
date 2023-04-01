@@ -48,7 +48,7 @@ public class AutoStraight extends CommandBase {
     
     if(Math.abs(navRot) < 20){
     double rotationVal =
-        rotationLimiter.calculate(navRot/50);
+        rotationLimiter.calculate(navRot/55);
 
     /* Drive */
     s_Swerve.drive(

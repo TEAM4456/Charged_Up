@@ -4,13 +4,15 @@ package frc.robot.Commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Subsystems.Arm;
+import frc.robot.Subsystems.ClampSubsystem;
 
 public class ClampOutLeft extends CommandBase{
-    public final Arm arm;
-    public ClampOutLeft(Arm arm){
-        this.arm = arm;
+    public final ClampSubsystem c;
+    public ClampOutLeft(ClampSubsystem c){
+        this.c = c;
     }
     public void execute() {
-        arm.clampOutLeft();
+        
+        c.clampOutLeft();
     }
 }
