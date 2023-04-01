@@ -28,8 +28,10 @@ public class AutoStraight extends CommandBase {
   public void execute() {
     /* Get Values, Deadband*/
     navRot = s_Swerve.getHeading();
-   
-    if(navRot > 20){
+    if(navRot < -160){
+      navRot = 10;
+    }
+    else if(navRot > 20){
       navRot = 10;
     }
     else if(navRot < -20){
