@@ -228,7 +228,7 @@ public class RobotContainer {
           )), new AutoBalanceSwerve(s_Swerve));
       
   }  
-  public Command testMove(){
+  public Command coneTwo(){
     TrajectoryConfig config =
     new TrajectoryConfig(
             Constants.AutoConstants.kMaxSpeedMetersPerSecond,
@@ -271,32 +271,20 @@ return new SequentialCommandGroup(
     Commands.parallel(arm.setHybridPositionCommand(),s_Swerve.driveToCommand(-4.45,0)),
     new ClampPositionCone(clampSub),
     Commands.parallel(new InstantCommand(()-> arm.sethighConeRotate()),new AutoStraightOpposite(s_Swerve)),
-    s_Swerve.driveToCommand(-.5,0)
+    s_Swerve.driveToCommandGeneral(-.5,0),
+     Commands.parallel(arm.setConeHighPositionCommand(),limeLight.autoConeLineupCommand())
     );
         
   }
-  public Command testMove2(){
-    return new SequentialCommandGroup(
-  Commands.parallel(new ClampPositionCube(clampSub),new InstantCommand(() -> arm.sethighCubeRotate())),
-  new HighCubeAuto(arm),
-  Commands.parallel(new ClampPositionDrop(clampSub),arm.bringElevatorInCommand()),
-  s_Swerve.driveToCommand(-4,0),
-  new AutoStraight(s_Swerve),
-  s_Swerve.driveToCommand(-4.45,-.25),
-  Commands.parallel(new AutoStraight(s_Swerve), arm.setHybridPositionCommand()),
-  new ClampPositionCone(clampSub),
-  Commands.parallel(new InstantCommand(() -> arm.sethighConeRotate()), new AutoStraightOpposite(s_Swerve)),
-  Commands.parallel(s_Swerve.driveToCommandGeneral(-.5,0),arm.setConeHighPositionCommand())
-  );
 
-  }
   public Command pickUpSequence(){
     return new SequentialCommandGroup(
       Commands.parallel(new AutoStraight(s_Swerve), new ClampPositionDrop(clampSub)),
       new InstantCommand(()-> arm.setPickupRotatePosition()),
       limeLight.autoPickupCommandGeneral(),
       new AutoStraight(s_Swerve), 
-      Commands.parallel(limeLight.autoPickupCommand(),arm.setPickupPositionCommand())
+      limeLight.autoPickupCommand(),
+      arm.setPickupPositionCommand()
     );  
 
       
@@ -308,8 +296,7 @@ return new SequentialCommandGroup(
         m_Chooser.addOption("Move Out",autoMoveOut());
         m_Chooser.addOption("Move Balance",autoMoveBalance());
         m_Chooser.addOption("Move Balance Quick",autoMoveBalanceQuick());
-        m_Chooser.setDefaultOption("test",testMove());
-        m_Chooser.addOption("test2",testMove2());
+        m_Chooser.setDefaultOption("2 piece cone",coneTwo());
         //m_Chooser.addOption("Pick Up Cone", new AutoPickUpCone(arm));
 
         SmartDashboard.putData("Auto Chooser", m_Chooser);  
@@ -338,14 +325,13 @@ return new SequentialCommandGroup(
     driver.leftTrigger().whileTrue(new ClampPositionCone(clampSub));
     driver.rightBumper().whileTrue(new ClampPositionDrop(clampSub));
     driver.rightTrigger().onTrue(new ClampPositionCube(clampSub));
+    driver.leftBumper().toggleOnTrue(pickUpSequence());
 
-    driver.leftBumper().onTrue(arm.setHybridPositionCommand());
-
-    second.leftTrigger().onTrue(pickUpSequence());
-    second.rightTrigger().whileTrue(new AutoStraightOpposite(s_Swerve));
-    second.leftBumper().onTrue(arm.setDrivePositionCommand());
+    second.leftTrigger().whileTrue(new AutoStraightOpposite(s_Swerve));
+    //second.rightTrigger().onTrue(new AutoStraightOpposite(s_Swerve));
+    second.leftBumper().onTrue(new AutoStraight(s_Swerve));
     second.rightBumper().onTrue(arm.setDrivePositionCommand());
-    //second.rightTrigger().whileTrue(limeLight.autoPickupCommand());
+    second.rightTrigger().whileTrue(limeLight.autoConeLineupCommand());
 
 
     //second.start().whileTrue(new limeLightSwerve(s_Swerve));
@@ -353,7 +339,7 @@ return new SequentialCommandGroup(
     second.x().onTrue(arm.setConeLowPositionCommand());
     second.b().onTrue(arm.setConeHighPositionCommand());
     second.a().onTrue(arm.setCubeLowPositionCommand());
-    second.start().whileTrue(new AutoStraight(s_Swerve));
+    second.start().whileTrue(arm.setHybridPositionCommand());
     
 
 
