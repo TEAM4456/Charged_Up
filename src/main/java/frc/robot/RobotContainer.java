@@ -43,6 +43,7 @@ import frc.robot.Subsystems.Swerve;
 import frc.robot.Autos.AutoBalanceAuto;
 import frc.robot.Autos.AutoStraight;
 import frc.robot.Autos.AutoStraightOpposite;
+import frc.robot.Autos.AutoStraightRed;
 import frc.robot.Commands.AutoBalanceSwerve;
 import frc.robot.Commands.ClampIn;
 import frc.robot.Commands.ClampInLeft;
@@ -196,39 +197,8 @@ public class RobotContainer {
       ), new AutoBalanceSwerve(s_Swerve));
     }
 
-      public Command autoMoveBalanceQuick(){
-        PathPlannerTrajectory trajBackBalance = PathPlanner.generatePath(
-          new PathConstraints(3,2),
-          new PathPoint(new Translation2d(0.0, 0.0), Rotation2d.fromDegrees(180), Rotation2d.fromDegrees(0)), // position, heading(direction of travel), holonomic rotation1),
-          new PathPoint(new Translation2d(3.25, 0), Rotation2d.fromDegrees(180), Rotation2d.fromDegrees(0))
-          //new PathPoint(new Translation2d(0.0, 0.0), Rotation2d.fromDegrees(180), Rotation2d.fromDegrees(0)) // position, heading(direction of travel), holonomic rotation
-         // new PathPoint(new Translation2d(1.0, 1.0), Rotation2d.fromDegrees(45), Rotation2d.fromDegrees(-90)) // position, heading(direction of travel), holonomic rotation
-          );
-        return new SequentialCommandGroup(
-         
-        new InstantCommand(() -> {
-              // Reset odometry for the first path you run during auto
-              s_Swerve.resetOdometry(trajBackBalance.getInitialPose());
     
-          }, s_Swerve),
-          Commands.parallel(new ClampPositionCube(clampSub),new InstantCommand(() -> arm.sethighCubeRotate())),
-          new HighCubeAuto(arm),
-          new ClampPositionDrop(clampSub),
-          Commands.parallel(new drivePosition(arm),
-          new PPSwerveControllerCommand(
-            trajBackBalance,
-            s_Swerve::getPose, // Pose supplier
-            Constants.Swerve.swerveKinematics, // SwerveDriveKinematics
-            new PIDController(Constants.AutoConstants.kPXController, 0, 0), // X controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
-            new PIDController(Constants.AutoConstants.kPYController, 0, 0), // Y controller (usually the same values as X controller)
-            new PIDController(Constants.AutoConstants.kPThetaController, 0, 0), // Rotation controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
-            s_Swerve::setModuleStates, // Module states consumer
-            true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
-            s_Swerve // Requires this drive subsystem
-          )), new AutoBalanceSwerve(s_Swerve));
-      
-  }  
-  public Command coneTwo(){
+  public Command coneTwoBlue(){
     TrajectoryConfig config =
     new TrajectoryConfig(
             Constants.AutoConstants.kMaxSpeedMetersPerSecond,
@@ -276,6 +246,54 @@ return new SequentialCommandGroup(
     );
         
   }
+  public Command coneTwoRed(){
+    TrajectoryConfig config =
+    new TrajectoryConfig(
+            Constants.AutoConstants.kMaxSpeedMetersPerSecond,
+            Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared)
+        .setKinematics(Constants.Swerve.swerveKinematics);
+
+// An example trajectory to follow.  All units in meters.
+Trajectory trajStart =
+    TrajectoryGenerator.generateTrajectory(
+        // Start at the origin facing the +X direction
+        new Pose2d(0, 0, new Rotation2d(Math.PI)),
+        // Pass through these two interior waypoints, making an 's' curve path
+        List.of(new Translation2d(-2, 0)),
+        // End 3 meters straight ahead of where we started, facing forward
+        new Pose2d(-4.30,0, new Rotation2d(Math.PI)),
+        config);
+var thetaController =
+    new ProfiledPIDController(
+        Constants.AutoConstants.kPThetaController, 0, 0, Constants.AutoConstants.kThetaControllerConstraints);
+        thetaController.enableContinuousInput(-Math.PI, Math.PI);
+
+new InstantCommand(() -> s_Swerve.resetOdometry(trajStart.getInitialPose()));
+return new SequentialCommandGroup(
+  Commands.parallel(new ClampPositionCube(clampSub),new InstantCommand(() -> arm.sethighCubeRotate())),
+  new HighCubeAuto(arm),
+  new ClampPositionDrop(clampSub), 
+  arm.bringElevatorInCommand(),
+  Commands.parallel(new InstantCommand(()-> arm.setHybridPositionRotate()),
+  new SwerveControllerCommand(
+        trajStart,
+        s_Swerve::getPose,
+        Constants.Swerve.swerveKinematics,
+        new PIDController(Constants.AutoConstants.kPXController, 0, 0),
+        new PIDController(Constants.AutoConstants.kPYController, 0, 0),
+        thetaController,
+        s_Swerve::setModuleStates,
+        s_Swerve)),
+        
+    new AutoStraightRed(s_Swerve),
+    Commands.parallel(arm.setHybridPositionCommand(),s_Swerve.driveToCommand(-4.45,0)),
+    new ClampPositionCone(clampSub),
+    Commands.parallel(new InstantCommand(()-> arm.sethighConeRotate()),new AutoStraightOpposite(s_Swerve)),
+    s_Swerve.driveToCommandGeneral(-.5,0),
+     Commands.parallel(arm.setConeHighPositionCommand(),limeLight.autoConeLineupCommand())
+    );
+        
+  }
 
   public Command pickUpSequence(){
     return new SequentialCommandGroup(
@@ -295,8 +313,8 @@ return new SequentialCommandGroup(
         //m_Chooser.addOption("Low Drop", new AutoDropLowCone(arm));
         m_Chooser.addOption("Move Out",autoMoveOut());
         m_Chooser.addOption("Move Balance",autoMoveBalance());
-        m_Chooser.addOption("Move Balance Quick",autoMoveBalanceQuick());
-        m_Chooser.setDefaultOption("2 piece cone",coneTwo());
+        m_Chooser.setDefaultOption("2 piece cone blue",coneTwoBlue());
+        m_Chooser.addOption("2 piece cone red",coneTwoRed());
         //m_Chooser.addOption("Pick Up Cone", new AutoPickUpCone(arm));
 
         SmartDashboard.putData("Auto Chooser", m_Chooser);  
@@ -329,7 +347,7 @@ return new SequentialCommandGroup(
 
     second.leftTrigger().whileTrue(new AutoStraightOpposite(s_Swerve));
     //second.rightTrigger().onTrue(new AutoStraightOpposite(s_Swerve));
-    second.leftBumper().onTrue(new AutoStraight(s_Swerve));
+    second.leftBumper().whileTrue(new AutoStraight(s_Swerve));
     second.rightBumper().onTrue(arm.setDrivePositionCommand());
     second.rightTrigger().whileTrue(limeLight.autoConeLineupCommand());
 
