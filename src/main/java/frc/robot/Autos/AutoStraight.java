@@ -28,8 +28,10 @@ public class AutoStraight extends CommandBase {
   public void execute() {
     /* Get Values, Deadband*/
     navRot = s_Swerve.getHeading();
-   
-    if(navRot > 20){
+    if(navRot < -160){
+      navRot = 10;
+    }
+    else if(navRot > 20){
       navRot = 10;
     }
     else if(navRot < -20){
@@ -48,7 +50,7 @@ public class AutoStraight extends CommandBase {
     
     if(Math.abs(navRot) < 20){
     double rotationVal =
-        rotationLimiter.calculate(navRot/50);
+        rotationLimiter.calculate(navRot/55);
 
     /* Drive */
     s_Swerve.drive(
@@ -62,4 +64,11 @@ public class AutoStraight extends CommandBase {
   public boolean isFinished() {
     return (Math.abs(navRot) < 1);
   }
+    @Override
+  public void end(boolean interrupted) {s_Swerve.drive(
+    new Translation2d(0,0).times(Constants.Swerve.maxSpeed),
+    0 * Constants.Swerve.maxAngularVelocity,
+    //!robotCentricSup.getAsBoolean(),
+    true);}
+  
 }

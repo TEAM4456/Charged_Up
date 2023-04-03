@@ -37,8 +37,9 @@ public class Swerve extends SubsystemBase {
   private PIDController m_balancePID = new PIDController(2, 0, 0);
 
   public Field2d field;
-
-  public Swerve() {
+  private final Arm arm;
+  public Swerve(Arm arm) {
+    this.arm = arm;
     m_gyro = new AHRS(SPI.Port.kMXP);
     m_gyro.setAngleAdjustment(180);
     //.configFactoryDefault();
@@ -199,6 +200,57 @@ public Rotation2d getRotation2d() {
       return run(() -> autoBalance()).until(() -> Math.abs(m_gyro.getRoll()) < 0);
     }
 
+    public void driveTo(double locationX, double locationY){
+      Pose2d locationList = field.getRobotPose();
+      double currentX= locationList.getX();
+      double currentY = locationList.getY();
+      double targetX = currentX - locationX;
+      double targetY = currentY - locationY;
+      if(currentX < 0.99 && currentX > 1.0){
+        arm.setHybridPositionRotate();
+      }
+      if(targetX > 2){
+        targetX = 2;
+      }else if(targetX > 1){
+        targetX = 1;
+      }
+      else if(targetX < -2){
+        targetX = -2;
+      }
+      else if(targetX < -1){
+        targetX = -1;
+      }
+
+      if(targetY > 1){
+        targetY = 1;
+      }else if(targetY > .5){
+        targetY = .5;
+      }
+      else if(targetY < -.1){
+        targetY = -1;
+      }
+      else if(targetY < -.5){
+        targetY = -.5;
+      }
+      if(Math.abs(targetX) < .025){
+        targetX = 0;
+      }
+      if(Math.abs(targetY) < .025){
+        targetY = 0;
+      }
+      SmartDashboard.putNumber("targetX", targetX);
+      SmartDashboard.putNumber("targetY",targetY);
+      drive(new Translation2d(targetX*2,targetY), 0, false);
+
+
+
+    }
+    public Command driveToCommand(double locX, double locY){
+      return run(() -> driveTo(locX,locY)).until(() -> (Math.abs(field.getRobotPose().getX() - locX) < .025 && Math.abs(field.getRobotPose().getY() - locY) < .025));
+    }
+    public Command driveToCommandGeneral(double locX, double locY){
+      return run(() -> driveTo(locX,locY)).until(() -> (Math.abs(field.getRobotPose().getX() + locX) < 1.5 && Math.abs(field.getRobotPose().getY() - locY) < .25));
+    }
   @Override
   public void periodic() {
     swerveOdometry.update(getRotation2d(), getModulePositions());
@@ -212,7 +264,8 @@ public Rotation2d getRotation2d() {
       SmartDashboard.putNumber(
           "Mod " + mod.moduleNumber + " Velocity", mod.getState().speedMetersPerSecond);
     }
-
+    SmartDashboard.putNumber("poseX", field.getRobotPose().getX());
+    SmartDashboard.putNumber("poseY", field.getRobotPose().getY());
     SmartDashboard.putNumber("NAVX Heading", this.getHeading());
   }
 }

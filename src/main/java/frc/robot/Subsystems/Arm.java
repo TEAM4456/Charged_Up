@@ -29,15 +29,7 @@ public class Arm extends SubsystemBase {
   public final SparkMaxPIDController elevatorLeftPID;
 
 
-  //clamps
-  public final CANSparkMax motor15;
-  public final CANSparkMax motor16;
-
-  public final SparkMaxPIDController clampRightPID;
-  public final SparkMaxPIDController clampLeftPID;
-
-  public RelativeEncoder clampEncoderRight;
-  public RelativeEncoder clampEncoderLeft;
+  
   
 
   //rotate
@@ -55,12 +47,7 @@ public class Arm extends SubsystemBase {
     motor14.setInverted(true);
     //motor14.follow(motor13);
 
-    motor15 = new CANSparkMax(15, MotorType.kBrushless); //right clamp
-    motor15.setOpenLoopRampRate(.5);
-
-    motor16 = new CANSparkMax(16, MotorType.kBrushless); //left clamp
-    motor16.setOpenLoopRampRate(.5);
-    motor16.setInverted(true);
+    
 
     motor17 = new CANSparkMax(17, MotorType.kBrushless); //rotate
     motor17.setOpenLoopRampRate(.5);
@@ -69,8 +56,7 @@ public class Arm extends SubsystemBase {
     elevatorEncoderRight = motor13.getEncoder();
     elevatorEncoderLeft = motor14.getEncoder();
 
-    clampEncoderRight = motor15.getEncoder();
-    clampEncoderLeft = motor16.getEncoder();
+    
 
     rotateEncoder = motor17.getEncoder();
 
@@ -86,17 +72,7 @@ public class Arm extends SubsystemBase {
     elevatorLeftPID.setD(0);
     elevatorLeftPID.setFF(0);
 
-    clampRightPID = motor15.getPIDController();
-    clampRightPID.setP(1);
-    clampRightPID.setI(0);
-    clampRightPID.setD(0);
-    clampRightPID.setFF(0);
-
-    clampLeftPID = motor16.getPIDController();
-    clampLeftPID.setP(1);
-    clampLeftPID.setI(0);
-    clampLeftPID.setD(0);
-    clampLeftPID.setFF(0);
+    
 
     rotationPID = motor17.getPIDController();
     rotationPID.setP(.04);
@@ -106,55 +82,7 @@ public class Arm extends SubsystemBase {
   }
 
 //CLAMP CONTROLS
-  public void clampInPositionCone(){
-    clampRightPID.setReference(Constants.armConstants.clampRightPickupCone,CANSparkMax.ControlType.kPosition); 
-    clampLeftPID.setReference(Constants.armConstants.clampLeftPickupCone,CANSparkMax.ControlType.kPosition);  
-  }
-  public void clampInPositionCube(){
-    clampRightPID.setReference(Constants.armConstants.clampRightPickupCube,CANSparkMax.ControlType.kPosition); 
-    clampLeftPID.setReference(Constants.armConstants.clampLeftPickupCube,CANSparkMax.ControlType.kPosition);  
-  }
   
-  public void clampOutPosition(){
-    clampRightPID.setReference(Constants.armConstants.clampRightDrop,CANSparkMax.ControlType.kPosition);
-    clampLeftPID.setReference(Constants.armConstants.clampLeftDrop,CANSparkMax.ControlType.kPosition);  
-  }
-
-  public void clampInRight(){
-    //double setpoint = (clampEncoderRight.getPosition() + 0.5);
-    clampRightPID.setReference(clampEncoderRight.getPosition() + 0.25,CANSparkMax.ControlType.kPosition); 
-  }
-  public void clampOutRight(){
-    //double setpoint = (clampEncoderRight.getPosition() - 0.5);
-    clampRightPID.setReference(clampEncoderRight.getPosition() - 0.25,CANSparkMax.ControlType.kPosition);
-  }
-
-  public void clampInLeft(){
-    clampLeftPID.setReference(clampEncoderLeft.getPosition() + 0.25,CANSparkMax.ControlType.kPosition);
-  }
-  
-  public void clampOutLeft(){
-    clampLeftPID.setReference(clampEncoderLeft.getPosition() - 0.25,CANSparkMax.ControlType.kPosition);
-  }
-  public void clampOut(){
-    clampLeftPID.setReference(clampEncoderLeft.getPosition() - 0.25,CANSparkMax.ControlType.kPosition);
-    clampRightPID.setReference(clampEncoderRight.getPosition() - 0.25,CANSparkMax.ControlType.kPosition);
-  }
-  public void clampIn(){
-    clampLeftPID.setReference(clampEncoderLeft.getPosition() + 0.25,CANSparkMax.ControlType.kPosition);
-    clampRightPID.setReference(clampEncoderRight.getPosition() + 0.25,CANSparkMax.ControlType.kPosition);
-  }
-  public void clampReset(){
-    clampLeftPID.setReference(.25,CANSparkMax.ControlType.kPosition);
-    clampRightPID.setReference(.25,CANSparkMax.ControlType.kPosition);
-  }
-  public boolean nearTarget(double positionRight){
-    boolean isDone = false;
-    if(Math.abs(clampEncoderRight.getPosition() - positionRight) < .25){
-      isDone = true;
-    }
-    return isDone;
-  }
 
 //ELEVATOR CONTROLS
 
@@ -202,6 +130,9 @@ public class Arm extends SubsystemBase {
     elevatorPosition(Constants.armConstants.elevatorDrive);
     rotatePosition(Constants.armConstants.rotateDrive);
   }
+  public void setHybridPositionRotate(){
+    rotatePosition(Constants.armConstants.rotateHybrid);
+  }
   public void setHybridPosition(){
     elevatorPosition(Constants.armConstants.elevatorHybrid);
     rotatePosition(Constants.armConstants.rotateHybrid);
@@ -214,6 +145,12 @@ public class Arm extends SubsystemBase {
     rotatePosition(Constants.armConstants.rotateHighCone);
     elevatorPosition(Constants.armConstants.elevatorHighCone);
     
+  }
+  public void sethighConeRotate(){
+    rotatePosition(Constants.armConstants.rotateHighCone);
+  }
+  public void sethighCubeRotate(){
+    rotatePosition(Constants.armConstants.rotateHighCone);
   }
   public void setCubeHighPosition(){
     rotatePosition(Constants.armConstants.rotateHighCube);
@@ -230,36 +167,39 @@ public class Arm extends SubsystemBase {
   public void setPickupRotatePosition(){
     rotatePosition(Constants.armConstants.rotatePickup);
   }
+  public CommandBase bringElevatorInCommand(){
+    return run(() -> elevatorPosition(2)).until(() -> Math.abs(elevatorEncoderRight.getPosition() - 2) < 3);
+  }
   public CommandBase setCubeHighPositionCommand(){
-    return run(() -> setCubeHighPosition()).until(() -> Math.abs(elevatorEncoderRight.getPosition() - Constants.armConstants.elevatorHighCube) < 1);
+    return run(() -> setCubeHighPosition()).until(() -> Math.abs(elevatorEncoderRight.getPosition() - Constants.armConstants.elevatorHighCube) < 1 && Math.abs(rotateEncoder.getPosition() - Constants.armConstants.rotateHighCube) < 1);
   }
   public CommandBase setConeHighPositionCommand(){
-    return run(() -> setConeHighPosition()).until(() -> Math.abs(elevatorEncoderRight.getPosition() - Constants.armConstants.elevatorHighCone) < 1);
+    return run(() -> setConeHighPosition()).until(() -> Math.abs(elevatorEncoderRight.getPosition() - Constants.armConstants.elevatorHighCone) < 1 && Math.abs(rotateEncoder.getPosition() - Constants.armConstants.rotateHighCone) < 1);
   }
   public CommandBase setCubeLowPositionCommand(){
-    return run(() -> setCubeLowPosition()).until(() -> Math.abs(elevatorEncoderRight.getPosition() - Constants.armConstants.elevatorLowCube) < 1);
+    return run(() -> setCubeLowPosition()).until(() -> Math.abs(elevatorEncoderRight.getPosition() - Constants.armConstants.elevatorLowCube) < 1 && Math.abs(rotateEncoder.getPosition() - Constants.armConstants.rotateLowCube) < 1);
   }
   public CommandBase setConeLowPositionCommand(){
-    return run(() -> setConeLowPosition()).until(() -> Math.abs(elevatorEncoderRight.getPosition() - Constants.armConstants.elevatorLowCone) < 1);
+    return run(() -> setConeLowPosition()).until(() -> Math.abs(elevatorEncoderRight.getPosition() - Constants.armConstants.elevatorLowCone) < 1 && Math.abs(rotateEncoder.getPosition() - Constants.armConstants.rotateLowCone) < 1);
   }
   public CommandBase setDrivePositionCommand(){
-    return run(() -> setDrivePosition()).until(() -> Math.abs(elevatorEncoderRight.getPosition() - Constants.armConstants.elevatorDrive) < 1);
+    return run(() -> setDrivePosition()).until(() -> Math.abs(elevatorEncoderRight.getPosition() - Constants.armConstants.elevatorDrive) < 1 && Math.abs(rotateEncoder.getPosition() - Constants.armConstants.rotateDrive) < 1);
   }
   public CommandBase setHybridPositionCommand(){
-    return run(() -> setHybridPosition()).until(() -> Math.abs(elevatorEncoderRight.getPosition() - Constants.armConstants.elevatorHybrid) < 1);
+    return run(() -> setHybridPosition()).until(() -> Math.abs(elevatorEncoderRight.getPosition() - Constants.armConstants.elevatorHybrid) < 1 && Math.abs(rotateEncoder.getPosition() - Constants.armConstants.rotateHybrid) < 1);
   }
   public CommandBase setPickupPositionCommand(){
-    return run(() -> setPickupPosition()).until(() -> Math.abs(elevatorEncoderRight.getPosition() - Constants.armConstants.elevatorPickup) < 1);
+    return run(() -> setPickupPosition()).until(() -> Math.abs(elevatorEncoderRight.getPosition() - Constants.armConstants.elevatorPickup) < 1 && Math.abs(rotateEncoder.getPosition() - Constants.armConstants.rotatePickup) < 1);
   }
   public void elevatorPosition(double elevatorSetpoint) {
     if(elevatorSetpoint-1>elevatorEncoderRight.getPosition()){
-      motor13.set(.25);
-      motor14.set(.25);
+      motor13.set(.3);
+      motor14.set(.3);
       System.out.println("go In");
     }
     else if(elevatorSetpoint+1<elevatorEncoderRight.getPosition()){
-      motor13.set(-.25);
-      motor14.set(-.25);
+      motor13.set(-.3);
+      motor14.set(-.3);
       System.out.println("go Out");
     }
     else{
@@ -304,14 +244,11 @@ public class Arm extends SubsystemBase {
     SmartDashboard.putNumber("Elevator Left",elevatorEncoderLeft.getPosition());
     SmartDashboard.putNumber("Elevator Right",elevatorEncoderRight.getPosition());
 
-    SmartDashboard.putNumber("Clamp Left",clampEncoderLeft.getPosition());
-    SmartDashboard.putNumber("Clamp Right",clampEncoderRight.getPosition());
-
+    
     SmartDashboard.putNumber("Rotation Encoder",rotateEncoder.getPosition());
 
     SmartDashboard.putNumber("Rotation Motor Output",motor17.getAppliedOutput());
-    SmartDashboard.putNumber("clamp right motor output", motor15.getAppliedOutput());
-    SmartDashboard.putNumber("clamp left motor output", motor16.getAppliedOutput());
+    
 
     SmartDashboard.putNumber("PDP 8", pdp.getCurrent(8));
     SmartDashboard.putNumber("PDP 9", pdp.getCurrent(9));

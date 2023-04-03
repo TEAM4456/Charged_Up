@@ -41,11 +41,9 @@ import frc.robot.Commands.limeLightSwerve;
 import frc.robot.Subsystems.LimeLightSubsystem;
 import frc.robot.Subsystems.Swerve;
 import frc.robot.Autos.AutoBalanceAuto;
-import frc.robot.Autos.AutoDropLowCone;
-import frc.robot.Autos.AutoDropStart;
-import frc.robot.Autos.AutoPickUpCone;
 import frc.robot.Autos.AutoStraight;
 import frc.robot.Autos.AutoStraightOpposite;
+import frc.robot.Autos.AutoStraightRed;
 import frc.robot.Commands.AutoBalanceSwerve;
 import frc.robot.Commands.ClampIn;
 import frc.robot.Commands.ClampInLeft;
@@ -62,6 +60,7 @@ import frc.robot.Commands.rotateDown;
 import frc.robot.Commands.rotateUp;
 import frc.robot.Commands.toggleSpeed;
 import frc.robot.Subsystems.Arm;
+import frc.robot.Subsystems.ClampSubsystem;
 import frc.robot.Commands.ClampInRight;
 import frc.robot.Commands.ClampOutRight;
 
@@ -102,9 +101,10 @@ public class RobotContainer {
  //     new JoystickButton(driver, XboxController.Button.kLeftBumper.value);
 
   /* Subsystems */
-  private final Swerve s_Swerve = new Swerve();
   private final Arm arm = new Arm();
+  private final Swerve s_Swerve = new Swerve(arm);
   private final LimeLightSubsystem limeLight = new LimeLightSubsystem(s_Swerve);
+  private final ClampSubsystem clampSub = new ClampSubsystem();
 
   private final SendableChooser<Command> m_Chooser = new SendableChooser<>();
 
@@ -147,9 +147,9 @@ public class RobotContainer {
 
       }, s_Swerve),
       
-      new ClampPositionCube(arm),
+      new ClampPositionCube(clampSub),
       new HighCubeAuto(arm),
-      new ClampPositionDrop(arm),
+      new ClampPositionDrop(clampSub),
       new drivePosition(arm),
       new PPSwerveControllerCommand(
         trajBack,
@@ -180,9 +180,9 @@ public class RobotContainer {
           s_Swerve.resetOdometry(trajBackBalance.getInitialPose());
 
       }, s_Swerve),
-      new ClampPositionCube(arm),
+      new ClampPositionCube(clampSub),
       new HighCubeAuto(arm),
-      new ClampPositionDrop(arm),
+      new ClampPositionDrop(clampSub),
       new drivePosition(arm),
       new PPSwerveControllerCommand(
         trajBackBalance,
@@ -195,15 +195,114 @@ public class RobotContainer {
         true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
         s_Swerve // Requires this drive subsystem
       ), new AutoBalanceSwerve(s_Swerve));
-  
-  }  
+    }
+
+    
+  public Command coneTwoBlue(){
+    TrajectoryConfig config =
+    new TrajectoryConfig(
+            Constants.AutoConstants.kMaxSpeedMetersPerSecond,
+            Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared)
+        .setKinematics(Constants.Swerve.swerveKinematics);
+
+// An example trajectory to follow.  All units in meters.
+Trajectory trajStart =
+    TrajectoryGenerator.generateTrajectory(
+        // Start at the origin facing the +X direction
+        new Pose2d(0, 0, new Rotation2d(Math.PI)),
+        // Pass through these two interior waypoints, making an 's' curve path
+        List.of(new Translation2d(-2, 0)),
+        // End 3 meters straight ahead of where we started, facing forward
+        new Pose2d(-4.30,0, new Rotation2d(Math.PI)),
+        config);
+var thetaController =
+    new ProfiledPIDController(
+        Constants.AutoConstants.kPThetaController, 0, 0, Constants.AutoConstants.kThetaControllerConstraints);
+        thetaController.enableContinuousInput(-Math.PI, Math.PI);
+
+new InstantCommand(() -> s_Swerve.resetOdometry(trajStart.getInitialPose()));
+return new SequentialCommandGroup(
+  Commands.parallel(new ClampPositionCube(clampSub),new InstantCommand(() -> arm.sethighCubeRotate())),
+  new HighCubeAuto(arm),
+  new ClampPositionDrop(clampSub), 
+  arm.bringElevatorInCommand(),
+  Commands.parallel(new InstantCommand(()-> arm.setHybridPositionRotate()),
+  new SwerveControllerCommand(
+        trajStart,
+        s_Swerve::getPose,
+        Constants.Swerve.swerveKinematics,
+        new PIDController(Constants.AutoConstants.kPXController, 0, 0),
+        new PIDController(Constants.AutoConstants.kPYController, 0, 0),
+        thetaController,
+        s_Swerve::setModuleStates,
+        s_Swerve)),
+        
+    new AutoStraight(s_Swerve),
+    Commands.parallel(arm.setHybridPositionCommand(),s_Swerve.driveToCommand(-4.45,0)),
+    new ClampPositionCone(clampSub),
+    Commands.parallel(new InstantCommand(()-> arm.sethighConeRotate()),new AutoStraightOpposite(s_Swerve)),
+    s_Swerve.driveToCommandGeneral(-.5,0),
+     Commands.parallel(arm.setConeHighPositionCommand(),limeLight.autoConeLineupCommand())
+    );
+        
+  }
+  public Command coneTwoRed(){
+    TrajectoryConfig config =
+    new TrajectoryConfig(
+            Constants.AutoConstants.kMaxSpeedMetersPerSecond,
+            Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared)
+        .setKinematics(Constants.Swerve.swerveKinematics);
+
+// An example trajectory to follow.  All units in meters.
+Trajectory trajStart =
+    TrajectoryGenerator.generateTrajectory(
+        // Start at the origin facing the +X direction
+        new Pose2d(0, 0, new Rotation2d(Math.PI)),
+        // Pass through these two interior waypoints, making an 's' curve path
+        List.of(new Translation2d(-2, 0)),
+        // End 3 meters straight ahead of where we started, facing forward
+        new Pose2d(-4.30,0, new Rotation2d(Math.PI)),
+        config);
+var thetaController =
+    new ProfiledPIDController(
+        Constants.AutoConstants.kPThetaController, 0, 0, Constants.AutoConstants.kThetaControllerConstraints);
+        thetaController.enableContinuousInput(-Math.PI, Math.PI);
+
+new InstantCommand(() -> s_Swerve.resetOdometry(trajStart.getInitialPose()));
+return new SequentialCommandGroup(
+  Commands.parallel(new ClampPositionCube(clampSub),new InstantCommand(() -> arm.sethighCubeRotate())),
+  new HighCubeAuto(arm),
+  new ClampPositionDrop(clampSub), 
+  arm.bringElevatorInCommand(),
+  Commands.parallel(new InstantCommand(()-> arm.setHybridPositionRotate()),
+  new SwerveControllerCommand(
+        trajStart,
+        s_Swerve::getPose,
+        Constants.Swerve.swerveKinematics,
+        new PIDController(Constants.AutoConstants.kPXController, 0, 0),
+        new PIDController(Constants.AutoConstants.kPYController, 0, 0),
+        thetaController,
+        s_Swerve::setModuleStates,
+        s_Swerve)),
+        
+    new AutoStraightRed(s_Swerve),
+    Commands.parallel(arm.setHybridPositionCommand(),s_Swerve.driveToCommand(-4.45,0)),
+    new ClampPositionCone(clampSub),
+    Commands.parallel(new InstantCommand(()-> arm.sethighConeRotate()),new AutoStraightOpposite(s_Swerve)),
+    s_Swerve.driveToCommandGeneral(-.5,0),
+     Commands.parallel(arm.setConeHighPositionCommand(),limeLight.autoConeLineupCommand())
+    );
+        
+  }
+
   public Command pickUpSequence(){
     return new SequentialCommandGroup(
-      Commands.parallel(new AutoStraight(s_Swerve), new ClampPositionDrop(arm)),
+      Commands.parallel(new AutoStraight(s_Swerve), new ClampPositionDrop(clampSub)),
       new InstantCommand(()-> arm.setPickupRotatePosition()),
       limeLight.autoPickupCommandGeneral(),
       new AutoStraight(s_Swerve), 
-      Commands.parallel(limeLight.autoPickupCommand(),arm.setPickupPositionCommand())
+      limeLight.autoPickupCommand(),
+      arm.setPickupPositionCommand()
     );  
 
       
@@ -213,7 +312,9 @@ public class RobotContainer {
         //m_Chooser.addOption("Starting Drop", new AutoDropStart(arm));
         //m_Chooser.addOption("Low Drop", new AutoDropLowCone(arm));
         m_Chooser.addOption("Move Out",autoMoveOut());
-        m_Chooser.setDefaultOption("Move Balance",autoMoveBalance());
+        m_Chooser.addOption("Move Balance",autoMoveBalance());
+        m_Chooser.setDefaultOption("2 piece cone blue",coneTwoBlue());
+        m_Chooser.addOption("2 piece cone red",coneTwoRed());
         //m_Chooser.addOption("Pick Up Cone", new AutoPickUpCone(arm));
 
         SmartDashboard.putData("Auto Chooser", m_Chooser);  
@@ -239,20 +340,16 @@ public class RobotContainer {
     driver.x().whileTrue(new ElevatorIn(arm));
     driver.b().whileTrue(new ElevatorOut(arm));
 
-    driver.leftTrigger().whileTrue(new ClampPositionCone(arm));
-    driver.rightBumper().whileTrue(new SequentialCommandGroup(
-      new ClampPositionDrop(arm),
-      new ClampPositionDrop(arm)
-      ));
-    driver.rightTrigger().onTrue(new ClampPositionCube(arm));
+    driver.leftTrigger().whileTrue(new ClampPositionCone(clampSub));
+    driver.rightBumper().whileTrue(new ClampPositionDrop(clampSub));
+    driver.rightTrigger().onTrue(new ClampPositionCube(clampSub));
+    driver.leftBumper().toggleOnTrue(pickUpSequence());
 
-    driver.leftBumper().onTrue(arm.setHybridPositionCommand());
-
-    second.leftTrigger().onTrue(pickUpSequence());
-    second.rightTrigger().onTrue(new AutoStraightOpposite(s_Swerve));
-    second.leftBumper().onTrue(arm.setDrivePositionCommand());
+    second.leftTrigger().whileTrue(new AutoStraightOpposite(s_Swerve));
+    //second.rightTrigger().onTrue(new AutoStraightOpposite(s_Swerve));
+    second.leftBumper().whileTrue(new AutoStraight(s_Swerve));
     second.rightBumper().onTrue(arm.setDrivePositionCommand());
-    //second.rightTrigger().whileTrue(limeLight.autoPickupCommand());
+    second.rightTrigger().whileTrue(limeLight.autoConeLineupCommand());
 
 
     //second.start().whileTrue(new limeLightSwerve(s_Swerve));
@@ -260,7 +357,7 @@ public class RobotContainer {
     second.x().onTrue(arm.setConeLowPositionCommand());
     second.b().onTrue(arm.setConeHighPositionCommand());
     second.a().onTrue(arm.setCubeLowPositionCommand());
-    second.start().whileTrue(new AutoStraight(s_Swerve));
+    second.start().whileTrue(arm.setHybridPositionCommand());
     
 
 
@@ -283,111 +380,5 @@ public class RobotContainer {
     s_Swerve.zeroHeading();
     s_Swerve.resetModulesToAbsolute();
     return m_Chooser.getSelected();
-    /* 
-    //PathPlannerTrajectory examplePath = PathPlanner.loadPath("New Path", new PathConstraints(3, 2));
-    PathPlannerTrajectory traj = PathPlanner.generatePath(
-      new PathConstraints(2.5,2),
-      new PathPoint(new Translation2d(0.0, 0.0), Rotation2d.fromDegrees(180), Rotation2d.fromDegrees(0)), // position, heading(direction of travel), holonomic rotation1),
-      new PathPoint(new Translation2d(4.5, 0), Rotation2d.fromDegrees(180), Rotation2d.fromDegrees(0)),
-      new PathPoint(new Translation2d(4.5, -2.0), Rotation2d.fromDegrees(180), Rotation2d.fromDegrees(0)) // position, heading(direction of travel), holonomic rotation
-      //new PathPoint(new Translation2d(0.0, 0.0), Rotation2d.fromDegrees(180), Rotation2d.fromDegrees(0)) // position, heading(direction of travel), holonomic rotation
-     // new PathPoint(new Translation2d(1.0, 1.0), Rotation2d.fromDegrees(45), Rotation2d.fromDegrees(-90)) // position, heading(direction of travel), holonomic rotation
-      );
-      PathPlannerTrajectory trajBack = PathPlanner.generatePath(
-      new PathConstraints(3,2),
-      new PathPoint(new Translation2d(0.0, 0.0), Rotation2d.fromDegrees(180), Rotation2d.fromDegrees(0)), // position, heading(direction of travel), holonomic rotation1),
-      new PathPoint(new Translation2d(5, 0), Rotation2d.fromDegrees(180), Rotation2d.fromDegrees(0))
-      //new PathPoint(new Translation2d(0.0, 0.0), Rotation2d.fromDegrees(180), Rotation2d.fromDegrees(0)) // position, heading(direction of travel), holonomic rotation
-     // new PathPoint(new Translation2d(1.0, 1.0), Rotation2d.fromDegrees(45), Rotation2d.fromDegrees(-90)) // position, heading(direction of travel), holonomic rotation
-      );
-      PathPlannerTrajectory trajBackBalance = PathPlanner.generatePath(
-      new PathConstraints(3,2),
-      new PathPoint(new Translation2d(0.0, 0.0), Rotation2d.fromDegrees(180), Rotation2d.fromDegrees(0)), // position, heading(direction of travel), holonomic rotation1),
-      new PathPoint(new Translation2d(2.5, 0), Rotation2d.fromDegrees(180), Rotation2d.fromDegrees(0))
-      //new PathPoint(new Translation2d(0.0, 0.0), Rotation2d.fromDegrees(180), Rotation2d.fromDegrees(0)) // position, heading(direction of travel), holonomic rotation
-     // new PathPoint(new Translation2d(1.0, 1.0), Rotation2d.fromDegrees(45), Rotation2d.fromDegrees(-90)) // position, heading(direction of travel), holonomic rotation
-      );
-    
-    PathPlannerTrajectory trajBalance = PathPlanner.generatePath(
-        new PathConstraints(2, 1),
-        new PathPoint(new Translation2d(4.5, -2.0), Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(0)), // position, heading(direction of travel), holonomic rotation
-        new PathPoint(new Translation2d(2.6, -2.0), Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(0)) // position, heading(direction of travel), holonomic rotation
-       // new PathPoint(new Translation2d(1.0, 1.0), Rotation2d.fromDegrees(45), Rotation2d.fromDegrees(-90)) // position, heading(direction of travel), holonomic rotation
-    );
-    
-
-    //s_Swerve.field.getObject("traj").setTrajectory(examplePath);
-
-    return new SequentialCommandGroup(
-     
-      new InstantCommand(() -> {
-            // Reset odometry for the first path you run during auto
-            s_Swerve.resetOdometry(traj.getInitialPose());
-
-        }, s_Swerve),
-        
-        new ClampPositionCube(arm),
-        new HighCubeAuto(arm),
-        new ClampPositionDrop(arm),
-        new drivePosition(arm),
-        
-         //with balance
-          
-        new PPSwerveControllerCommand(
-          traj,//trajBalance,
-          s_Swerve::getPose, // Pose supplier
-          Constants.Swerve.swerveKinematics, // SwerveDriveKinematics
-          new PIDController(Constants.AutoConstants.kPXController, 0, 0), // X controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
-          new PIDController(Constants.AutoConstants.kPYController, 0, 0), // Y controller (usually the same values as X controller)
-          new PIDController(Constants.AutoConstants.kPThetaController, 0, 0), // Rotation controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
-          s_Swerve::setModuleStates, // Module states consumer
-          true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
-          s_Swerve // Requires this drive subsystem
-        ),
-        new PPSwerveControllerCommand(
-          trajBalance,
-          s_Swerve::getPose, // Pose supplier
-          Constants.Swerve.swerveKinematics, // SwerveDriveKinematics
-          new PIDController(Constants.AutoConstants.kPXController, 0, 0), // X controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
-          new PIDController(Constants.AutoConstants.kPYController, 0, 0), // Y controller (usually the same values as X controller)
-          new PIDController(Constants.AutoConstants.kPThetaController, 0, 0), // Rotation controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
-          s_Swerve::setModuleStates, // Module states consumer
-          true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
-          s_Swerve // Requires this drive subsystem
-        ),
-        
-        //go back
-        new PPSwerveControllerCommand(
-          trajBack,
-          s_Swerve::getPose, // Pose supplier
-          Constants.Swerve.swerveKinematics, // SwerveDriveKinematics
-          new PIDController(Constants.AutoConstants.kPXController, 0, 0), // X controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
-          new PIDController(Constants.AutoConstants.kPYController, 0, 0), // Y controller (usually the same values as X controller)
-          new PIDController(Constants.AutoConstants.kPThetaController, 0, 0), // Rotation controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
-          s_Swerve::setModuleStates, // Module states consumer
-          true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
-          s_Swerve // Requires this drive subsystem
-        ),
-        
-        new PPSwerveControllerCommand(
-          trajBackBalance,
-          s_Swerve::getPose, // Pose supplier
-          Constants.Swerve.swerveKinematics, // SwerveDriveKinematics
-          new PIDController(Constants.AutoConstants.kPXController, 0, 0), // X controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
-          new PIDController(Constants.AutoConstants.kPYController, 0, 0), // Y controller (usually the same values as X controller)
-          new PIDController(Constants.AutoConstants.kPThetaController, 0, 0), // Rotation controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
-          s_Swerve::setModuleStates, // Module states consumer
-          true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
-          s_Swerve // Requires this drive subsystem
-        )
-        
-        
-        
-        //go back balance
-        //for auto balance for autonomous 
-        , new AutoBalanceSwerve(s_Swerve)
-  
-        );
- */
-    }   
+  }
 }
