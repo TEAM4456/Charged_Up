@@ -37,9 +37,7 @@ public class Swerve extends SubsystemBase {
   private PIDController m_balancePID = new PIDController(2, 0, 0);
 
   public Field2d field;
-  private final Arm arm;
-  public Swerve(Arm arm) {
-    this.arm = arm;
+  public Swerve() {
     m_gyro = new AHRS(SPI.Port.kMXP);
     m_gyro.setAngleAdjustment(180);
     //.configFactoryDefault();
@@ -207,7 +205,6 @@ public Rotation2d getRotation2d() {
       double targetX = currentX - locationX;
       double targetY = currentY - locationY;
       if(currentX < 0.99 && currentX > 1.0){
-        arm.setHybridPositionRotate();
       }
       if(targetX > 2){
         targetX = 2;
