@@ -5,9 +5,15 @@
 package frc.robot.Subsystems;
 
 import com.kauailabs.navx.frc.AHRS;
-import com.pathplanner.lib.PathPlannerTrajectory;
+import com.pathplanner.lib.*;
+import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.*;
-
+import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.path.PathPlannerTrajectory;
+import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
+import com.pathplanner.lib.util.PIDConstants;
+import com.pathplanner.lib.util.ReplanningConfig;
+import com.pathplanner.lib.*;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -37,11 +43,8 @@ public class Swerve extends SubsystemBase {
   private PIDController m_balancePID = new PIDController(2, 0, 0);
 
   public Field2d field;
-  private final Arm arm;
-  public Swerve(Arm arm) {
-    this.arm = arm;
+  public Swerve() {
     m_gyro = new AHRS(SPI.Port.kMXP);
-    m_gyro.setAngleAdjustment(180);
     //.configFactoryDefault();
     zeroHeading();
 
@@ -60,6 +63,20 @@ public class Swerve extends SubsystemBase {
 
     field = new Field2d();
     SmartDashboard.putData("Field", field);
+    AutoBuilder.configureHolonomic(
+        this::getPose, // Robot pose supplier
+        this::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
+        this::getRobotRelativeSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+        this::driveRobotRelative, // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
+        new HolonomicPathFollowerConfig( // HolonomicPathFollowerConfig, this should likely live in your Constants class
+            new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
+            new PIDConstants(5.0, 0.0, 0.0), // Rotation PID constants
+            4.5, // Max module speed, in m/s
+            0.4, // Drive base radius in meters. Distance from robot center to furthest module.
+            new ReplanningConfig() // Default path replanning config. See the API for the options here
+        ),
+        this // Reference to this subsystem to set requirements
+    );
   }
   
   public void drive(
@@ -166,27 +183,8 @@ public Rotation2d getRotation2d() {
       }
   }
 
-  public CommandBase followTrajectoryCommand(PathPlannerTrajectory traj, boolean isFirstPath) {
-   return new SequentialCommandGroup(
-        new InstantCommand(() -> {
-          // Reset odometry for the first path you run during auto
-          if(isFirstPath){
-              this.resetOdometry(traj.getInitialHolonomicPose());
-          }
-        }),
-        new PPSwerveControllerCommand(
-            traj, 
-            this::getPose, // Pose supplier
-            Constants.Swerve.swerveKinematics, // SwerveDriveKinematics
-            new PIDController(Constants.AutoConstants.kPXController, 0, 0), // X controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
-            new PIDController(Constants.AutoConstants.kPYController, 0, 0), // Y controller (usually the same values as X controller)
-            new PIDController(Constants.AutoConstants.kPThetaController, 0, 0), // Rotation controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
-            this::setModuleStates, // Module states consumer
-            true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
-            this // Requires this drive subsystem
-        )
-    );
-    }
+  // Assuming this is a method in your drive subsystem
+
     public void autoBalance() {
       m_balancePID.setTolerance(.1);
       double pidOutput;
@@ -207,7 +205,6 @@ public Rotation2d getRotation2d() {
       double targetX = currentX - locationX;
       double targetY = currentY - locationY;
       if(currentX < 0.99 && currentX > 1.0){
-        arm.setHybridPositionRotate();
       }
       if(targetX > 2){
         targetX = 2;
@@ -251,6 +248,7 @@ public Rotation2d getRotation2d() {
     public Command driveToCommandGeneral(double locX, double locY){
       return run(() -> driveTo(locX,locY)).until(() -> (Math.abs(field.getRobotPose().getX() + locX) < 1.5 && Math.abs(field.getRobotPose().getY() - locY) < .25));
     }
+    // Assuming this is a method in your drive subsystem
   @Override
   public void periodic() {
     swerveOdometry.update(getRotation2d(), getModulePositions());
